@@ -10,12 +10,12 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
   const session = await getResidentSession();
   if (!session) redirect("/start");
 
-  const request = getRequestById(id);
+  const request = await getRequestById(id);
   if (!request || request.residentEmail !== session.email) notFound();
 
   if (request.status === "draft") redirect(`/requests/${id}/questions`);
 
-  const messages = getOfficialMessages(id).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  const messages = (await getOfficialMessages(id)).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   const category = getCategory(request.categorySlug);
 
   return (

@@ -10,10 +10,10 @@ export async function submitAction(requestId: string) {
   const session = await getResidentSession();
   if (!session) redirect("/start");
 
-  const request = getRequestById(requestId);
+  const request = await getRequestById(requestId);
   if (!request || request.residentEmail !== session.email) throw new Error("Not found");
 
-  submitRequest(requestId);
+  await submitRequest(requestId);
   redirect(`/requests/${requestId}`);
 }
 
@@ -21,7 +21,7 @@ export async function uploadDocumentAction(requestId: string, formData: FormData
   const session = await getResidentSession();
   if (!session) redirect("/start");
 
-  const request = getRequestById(requestId);
+  const request = await getRequestById(requestId);
   if (!request || request.residentEmail !== session.email) throw new Error("Not found");
 
   const file = formData.get("file") as File | null;
@@ -37,7 +37,7 @@ export async function uploadDocumentAction(requestId: string, formData: FormData
     address: request.address,
   });
 
-  addDocument(requestId, {
+  await addDocument(requestId, {
     name: file.name,
     sizeBytes: file.size,
     uploadedBy: session.email,

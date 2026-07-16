@@ -11,7 +11,7 @@ export default async function QuestionsPage({ params }: { params: Promise<{ id: 
   const session = await getResidentSession();
   if (!session) redirect("/start");
 
-  const request = getRequestById(id);
+  const request = await getRequestById(id);
   if (!request || request.residentEmail !== session.email) notFound();
 
   const category = getCategory(request.categorySlug);

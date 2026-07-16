@@ -1,13 +1,10 @@
 import "server-only";
-import { randomUUID } from "node:crypto";
-import { readDb, writeDb } from "./store";
+import { supabase } from "./supabase";
 
-// TEMPORARY dev auth. DESIGN.md §3 specifies Supabase Auth's built-in
-// passwordless magic-link sign-in for this exact "no password to remember"
-// flow. Until that project is provisioned, this issues our own token and
-// simulates the emailed link with a page you click through in the browser —
-// same shape (token proves email ownership, not homeowner status), so
-// swapping in real Supabase Auth later shouldn't change callers.
+// Own magic-link token issuance/consumption (not Supabase Auth's built-in
+// flow — DESIGN.md §3 describes that as a later step). The token proves
+// email ownership, not homeowner status; `magic_links` is a plain table
+// backed by real Postgres now instead of a JSON file.
 
 const RESIDENT_COOKIE = "arc_resident";
 const BOARD_COOKIE = "arc_board";
@@ -18,20 +15,24 @@ export interface ResidentSession {
   name: string;
 }
 
-export function issueMagicLink(email: string, address: string, name: string): string {
-  const db = readDb();
-  const token = randomUUID();
-  db.magicLinks.push({ token, email, address, name, createdAt: new Date().toISOString() });
-  writeDb(db);
-  return token;
+export async function issueMagicLink(email: string, address: string, name: string): Promise<string> {
+  const { data, error } = await supabase
+    .from("magic_links")
+    .insert({ email, address, name })
+    .select("token")
+    .single();
+  if (error) throw new Error(error.message);
+  return data.token as string;
 }
 
-export function consumeMagicLink(token: string): ResidentSession | null {
-  const db = readDb();
-  const link = db.magicLinks.find((l) => l.token === token);
-  if (!link) return null;
-  link.usedAt = new Date().toISOString();
-  writeDb(db);
+export async function consumeMagicLink(token: string): Promise<ResidentSession | null> {
+  const { data: link, error } = await supabase
+    .from("magic_links")
+    .select("email, address, name")
+    .eq("token", token)
+    .single();
+  if (error || !link) return null;
+  await supabase.from("magic_links").update({ used_at: new Date().toISOString() }).eq("token", token);
   return { email: link.email, address: link.address, name: link.name };
 }
 

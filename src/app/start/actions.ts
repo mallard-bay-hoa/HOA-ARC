@@ -27,7 +27,7 @@ export async function sendMagicLink(_prevState: { error?: string } | undefined, 
   // Requirements §12: homeowner verification happens here in a real build —
   // matching `address` against a roster, or routing to an admin-glance queue
   // if unmatched. Neither exists yet, so every request proceeds directly.
-  const token = issueMagicLink(email, address, name);
+  const token = await issueMagicLink(email, address, name);
 
   await sendEmail(
     email,

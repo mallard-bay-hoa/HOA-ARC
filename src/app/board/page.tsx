@@ -10,7 +10,7 @@ export default async function BoardDashboardPage() {
   const member = await getBoardSession();
   if (!member) redirect("/board/signin");
 
-  const requests = listAllRequests();
+  const requests = await listAllRequests();
 
   return (
     <>

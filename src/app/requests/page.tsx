@@ -10,7 +10,7 @@ export default async function MyRequestsPage() {
   const session = await getResidentSession();
   if (!session) redirect("/start");
 
-  const requests = getRequestsByEmail(session.email);
+  const requests = await getRequestsByEmail(session.email);
 
   return (
     <>

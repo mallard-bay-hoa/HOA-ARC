@@ -15,7 +15,7 @@ export async function addCommentAction(requestId: string, formData: FormData) {
   const body = String(formData.get("body") ?? "").trim();
   if (!body) return;
 
-  addBoardComment(requestId, member.id, member.name, body);
+  await addBoardComment(requestId, member.id, member.name, body);
   revalidatePath(`/board/${requestId}`);
 }
 
@@ -26,7 +26,7 @@ export async function requestInfoAction(requestId: string, formData: FormData) {
   const body = String(formData.get("body") ?? "").trim();
   if (!body) return;
 
-  const request = requestMoreInfo(requestId, member.id, body);
+  const request = await requestMoreInfo(requestId, member.id, body);
   const category = getCategory(request.categorySlug)?.name ?? request.categorySlug;
 
   await sendEmail(
@@ -54,7 +54,7 @@ export async function castVoteAction(requestId: string, decision: VoteDecision, 
     .map((s) => s.trim())
     .filter(Boolean);
 
-  const request = castVote(requestId, member.id, member.address, decision, citedSections);
+  const request = await castVote(requestId, member.id, member.address, decision, citedSections);
 
   const label = DECISION_LABEL[request.status];
   if (label) {
@@ -62,7 +62,8 @@ export async function castVoteAction(requestId: string, decision: VoteDecision, 
     // input — the recorded citations are aggregated across every matching
     // vote (see castVote), which can include conditions another board
     // member typed on an earlier vote.
-    const decisionMessage = getOfficialMessages(requestId)
+    const messages = await getOfficialMessages(requestId);
+    const decisionMessage = messages
       .filter((m) => m.messageType === request.status)
       .at(-1);
     const cited = decisionMessage?.citedSections ?? [];

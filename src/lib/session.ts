@@ -42,7 +42,8 @@ export async function getBoardSession(): Promise<BoardMember | null> {
   const store = await cookies();
   const id = store.get(BOARD_COOKIE)?.value;
   if (!id) return null;
-  return boardMembers().find((m) => m.id === id) ?? null;
+  const members = await boardMembers();
+  return members.find((m) => m.id === id) ?? null;
 }
 
 export async function setBoardSession(memberId: string): Promise<void> {

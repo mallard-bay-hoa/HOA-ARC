@@ -3,8 +3,8 @@ import { TopBar } from "@/components/TopBar";
 import { Card, Button } from "@/components/ui";
 import { signInAsBoardMember } from "./actions";
 
-export default function BoardSignInPage() {
-  const members = boardMembers();
+export default async function BoardSignInPage() {
+  const members = await boardMembers();
 
   return (
     <>

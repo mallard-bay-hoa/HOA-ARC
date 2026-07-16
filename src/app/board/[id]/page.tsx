@@ -12,12 +12,12 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
   const member = await getBoardSession();
   if (!member) redirect("/board/signin");
 
-  const request = getRequestById(id);
+  const request = await getRequestById(id);
   if (!request) notFound();
 
-  const comments = getBoardComments(id);
-  const messages = getOfficialMessages(id).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
-  const votes = getVotes(id);
+  const comments = await getBoardComments(id);
+  const messages = (await getOfficialMessages(id)).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  const votes = await getVotes(id);
   const category = getCategory(request.categorySlug);
 
   const isOwnRequest = request.address === member.address;

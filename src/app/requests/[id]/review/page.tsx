@@ -11,7 +11,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
   const session = await getResidentSession();
   if (!session) redirect("/start");
 
-  const request = getRequestById(id);
+  const request = await getRequestById(id);
   if (!request || request.residentEmail !== session.email) notFound();
 
   const hasGovViolation = request.flags.some((f) => f.type === "government_violation");

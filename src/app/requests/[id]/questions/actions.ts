@@ -9,11 +9,11 @@ export async function saveAnswersAndContinue(requestId: string, answers: Record<
   const session = await getResidentSession();
   if (!session) redirect("/start");
 
-  const request = getRequestById(requestId);
+  const request = await getRequestById(requestId);
   if (!request || request.residentEmail !== session.email) {
     throw new Error("Not found");
   }
 
-  saveAnswers(requestId, answers);
+  await saveAnswers(requestId, answers);
   redirect(`/requests/${requestId}/review`);
 }

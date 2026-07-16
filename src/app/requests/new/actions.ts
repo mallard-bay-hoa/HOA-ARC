@@ -14,7 +14,7 @@ export async function startCategory(categorySlug: string) {
     throw new Error("That category isn't available yet.");
   }
 
-  const request = createDraftRequest({
+  const request = await createDraftRequest({
     categorySlug,
     address: session.address,
     residentName: session.name,

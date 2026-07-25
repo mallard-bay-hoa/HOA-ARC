@@ -48,8 +48,7 @@ deliberately faked rather than left half-built:
 
 | Piece | File | Stub behavior | Real version |
 |---|---|---|---|
-| Database | `src/lib/data/store.ts` | JSON file at `.data/db.json` | Supabase Postgres (`supabase/migrations/0001_init.sql` has the target schema) |
-| Auth | `src/lib/session.ts`, `src/lib/data/auth.ts` | Unsigned cookies; a "simulate clicking the emailed link" button stands in for a real email | Supabase Auth magic-link sign-in (DESIGN.md §3) |
+| Auth | `src/lib/session.ts`, `src/lib/data/auth.ts` | Real Supabase Postgres-backed magic-link tokens (`src/lib/data/auth.ts`), but sessions are still unsigned cookies; a "simulate clicking the emailed link" button stands in for a real email | Supabase Auth magic-link sign-in + signed sessions (DESIGN.md §3) |
 | File storage | `src/lib/drive.ts` | Records file metadata only, never persists bytes | Google Drive API via a service account on a Shared Drive (DESIGN.md §5) |
 | Email | `src/lib/email.ts` | Logs to the server console | Resend (DESIGN.md §7) |
 | Timers | date fields are computed and displayed | no daily job actually fires | Vercel Cron hitting an API route (DESIGN.md §6, doubles as the Supabase keep-alive) |
@@ -58,13 +57,14 @@ All 5 categories are enabled. An admin UI for editing question trees is
 still the one deferred piece from DESIGN.md §4 — for now, adding or tweaking
 a question means editing its category file directly.
 
-## Moving off the dev store
+## Database
 
-When the Supabase project exists, `src/lib/data/*.ts` and `src/lib/session.ts`
-are the only files that should need real changes — every page and Server
-Action calls functions from those modules rather than touching storage
-directly, so the swap is contained. Fill in `.env.example` as each
-integration comes online.
+`src/lib/data/*.ts` talks to a real Supabase Postgres project via
+`src/lib/data/supabase.ts` (service-role key, server-only). See
+[HANDOFF.md](./HANDOFF.md) for account access and the exact schema
+(`supabase/migrations/0001_initial_schema.sql`). File storage and email are
+still stubbed — fill in the rest of `.env.example` as those integrations
+come online.
 
 ## A known rough edge
 

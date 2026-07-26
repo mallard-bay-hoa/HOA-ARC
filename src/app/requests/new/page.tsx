@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getResidentSession } from "@/lib/session";
+import { getAllPropertyAddresses } from "@/lib/data/residents";
 import { CATEGORIES } from "@/lib/domain/categories";
 import { TopBar } from "@/components/TopBar";
 import { Card } from "@/components/ui";
@@ -16,6 +17,7 @@ export default async function NewRequestPage({
   if (!session) redirect("/start");
 
   if (!session.name || session.addresses.length === 0) {
+    const knownAddresses = await getAllPropertyAddresses();
     return (
       <>
         <TopBar eyebrow="Mallard Bay ARC" title="A couple more details" />
@@ -26,7 +28,7 @@ export default async function NewRequestPage({
               We don&rsquo;t have a name or property address on file for this email yet.
             </p>
             <div className="mt-6">
-              <ResidentDetailsForm />
+              <ResidentDetailsForm knownAddresses={knownAddresses} />
             </div>
           </Card>
         </main>

@@ -25,7 +25,12 @@ export async function getResidentSession(): Promise<ResidentSession | null> {
   const raw = store.get(RESIDENT_COOKIE)?.value;
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as ResidentSession;
+    const parsed = JSON.parse(raw) as Partial<ResidentSession>;
+    if (!parsed.email) return null;
+    // Cookies set before the multi-property model shipped predate the addresses
+    // array (up to 30 days old, per the cookie's maxAge) — default it so every
+    // page can assume session.addresses is always an array.
+    return { ...parsed, email: parsed.email, addresses: parsed.addresses ?? [] };
   } catch {
     return null;
   }

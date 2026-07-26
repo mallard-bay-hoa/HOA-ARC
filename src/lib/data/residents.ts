@@ -77,8 +77,16 @@ export async function getAllBoardMembers(): Promise<BoardMember[]> {
   );
 }
 
+/** Every known property address — powers the intake form's autocomplete so residents pick their
+ * real address instead of retyping a slight variant that'd otherwise create a duplicate property. */
+export async function getAllPropertyAddresses(): Promise<string[]> {
+  const { data, error } = await supabase.from("properties").select("address").order("address");
+  if (error || !data) return [];
+  return data.map((p) => p.address);
+}
+
 async function getOrCreatePropertyId(address: string): Promise<string> {
-  const normalized = address.trim();
+  const normalized = address.trim().replace(/\s+/g, " ");
   const { data: existing } = await supabase.from("properties").select("id").ilike("address", normalized).maybeSingle();
   if (existing) return existing.id;
 

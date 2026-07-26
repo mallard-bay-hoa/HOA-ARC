@@ -6,6 +6,9 @@ const MESSAGE_TYPE_LABELS: Record<MessageType, string> = {
   denied: "Denied",
   approved_conditional: "Approved (Conditions)",
   general: "Update",
+  auto_approved: "Auto-Approved",
+  expiry_warning: "Approval Expiring Soon",
+  expired: "Approval Expired",
 };
 
 /** Display label for an official message's type — distinguishes a resident's own reply from Board updates. */

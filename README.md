@@ -35,6 +35,13 @@ required to try the full flow — see "What's stubbed" below.
   input can't be silently dropped by another's), the conflict-of-interest
   check (a board member can't vote on their own address), and the Utah HB
   217 citation requirement on denials.
+- **Daily timer sweep** (`src/lib/cron.ts`, `src/app/api/cron/timers/route.ts`) —
+  a real Vercel Cron job (see `vercel.json`) that sends the 14-day SLA
+  reminder digest, auto-approves (or escalates a government-code violation
+  instead of auto-approving) past the 28-day failsafe, and warns/expires
+  approvals past the 90-day Rule 9.5 window. Also doubles as the Supabase
+  keep-alive ping (DESIGN.md §1a) since it hits the database daily
+  regardless of whether any request needs action.
 - **Every page in the sitemap**, for all 5 categories: start → magic-link →
   category select → adaptive questionnaire → readiness summary → submit →
   resident detail, plus the full board side (dashboard, tabs, internal
@@ -50,7 +57,6 @@ deliberately faked rather than left half-built:
 |---|---|---|---|
 | Auth | `src/lib/session.ts`, `src/lib/data/auth.ts` | Real Supabase Postgres-backed magic-link tokens (`src/lib/data/auth.ts`), but sessions are still unsigned cookies; a "simulate clicking the emailed link" button stands in for a real email | Supabase Auth magic-link sign-in + signed sessions (DESIGN.md §3) |
 | Email | `src/lib/email.ts` | Logs to the server console | Resend (DESIGN.md §7) |
-| Timers | date fields are computed and displayed | no daily job actually fires | Vercel Cron hitting an API route (DESIGN.md §6, doubles as the Supabase keep-alive) |
 
 All 5 categories are enabled. An admin UI for editing question trees is
 still the one deferred piece from DESIGN.md §4 — for now, adding or tweaking

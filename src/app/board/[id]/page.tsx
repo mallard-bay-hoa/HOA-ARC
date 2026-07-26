@@ -28,7 +28,7 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
   const myVote = votes.find((v) => v.boardMemberId === member.id);
   const approveCount = votes.filter((v) => v.decision === "approve").length;
   const denyCount = votes.filter((v) => v.decision === "deny").length;
-  const decided = ["approved", "approved_conditional", "denied", "auto_approved"].includes(request.status);
+  const decided = ["approved", "approved_conditional", "denied", "auto_approved", "expired"].includes(request.status);
 
   const boundApprove = castVoteAction.bind(null, id, "approve");
   const boundDeny = castVoteAction.bind(null, id, "deny");

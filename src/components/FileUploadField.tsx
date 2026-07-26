@@ -45,6 +45,10 @@ export function FileUploadField({
 
   return (
     <div className="flex flex-col gap-2">
+      <p className="text-sm text-slate-600">
+        Please submit drawings, plans, photos, building permits, etc. to help the board understand your
+        request.
+      </p>
       <div className="flex items-center gap-3">
         <Button type="button" variant="ghost" onClick={() => inputRef.current?.click()}>
           Choose File

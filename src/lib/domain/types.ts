@@ -6,7 +6,8 @@ export type RequestStatus =
   | "approved"
   | "approved_conditional"
   | "denied"
-  | "auto_approved";
+  | "auto_approved"
+  | "expired"; // approval lapsed after 90 days with no work started (Rule 9.5)
 
 export type FlagType = "hoa_conflict" | "government_violation" | "permit_reminder";
 
@@ -74,7 +75,15 @@ export interface BoardComment {
   createdAt: string;
 }
 
-export type MessageType = "info_request" | "approved" | "denied" | "approved_conditional" | "general";
+export type MessageType =
+  | "info_request"
+  | "approved"
+  | "denied"
+  | "approved_conditional"
+  | "general"
+  | "auto_approved"
+  | "expiry_warning"
+  | "expired";
 
 export interface OfficialMessage {
   id: string;

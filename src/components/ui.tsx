@@ -11,6 +11,7 @@ export function StatusPill({ status }: { status: RequestStatus }) {
     approved_conditional: { label: "Approved (Conditions)", className: "bg-amber-100 text-amber-800" },
     denied: { label: "Denied", className: "bg-rose-100 text-rose-700" },
     auto_approved: { label: "Auto-Approved", className: "bg-emerald-100 text-emerald-700" },
+    expired: { label: "Approval Expired", className: "bg-slate-100 text-slate-600" },
   };
   const { label, className } = map[status];
   return (

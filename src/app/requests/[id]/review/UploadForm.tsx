@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { Button } from "@/components/ui";
 import { FileUploadField } from "@/components/FileUploadField";
+import { DocumentLinks } from "@/components/DocumentLinks";
 import { uploadDocumentAction } from "./actions";
 import { removeDocumentAction } from "../actions";
 import type { Document } from "@/lib/domain/types";
@@ -32,15 +33,15 @@ export function UploadForm({ requestId, documents }: { requestId: string; docume
             <li key={d.id} className="flex items-center justify-between gap-3">
               <span>
                 {d.name} ({Math.round(d.sizeBytes / 1024)} KB)
-                {!d.persistedToDrive && (
-                  <span className="ml-2 text-xs text-amber-700">— not yet saved to Drive (integration not wired up)</span>
-                )}
               </span>
-              <form action={removeDocumentAction.bind(null, requestId, d.id)}>
-                <button type="submit" className="shrink-0 text-xs text-rose-700 hover:underline">
-                  Remove
-                </button>
-              </form>
+              <span className="flex shrink-0 items-center gap-3">
+                <DocumentLinks requestId={requestId} documentId={d.id} />
+                <form action={removeDocumentAction.bind(null, requestId, d.id)}>
+                  <button type="submit" className="text-xs text-rose-700 hover:underline">
+                    Remove
+                  </button>
+                </form>
+              </span>
             </li>
           ))}
         </ul>

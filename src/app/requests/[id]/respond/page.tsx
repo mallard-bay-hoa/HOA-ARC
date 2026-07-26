@@ -12,7 +12,7 @@ export default async function RespondPage({ params }: { params: Promise<{ id: st
   if (!session) redirect("/start");
 
   const request = await getRequestById(id);
-  if (!request || request.residentEmail !== session.email) notFound();
+  if (!request || !session.addresses.includes(request.address)) notFound();
   if (request.status !== "info_requested") redirect(`/requests/${id}`);
 
   const messages = await getOfficialMessages(id);

@@ -13,3 +13,13 @@ export function messageTypeLabel(messageType: MessageType, isFromResident: boole
   if (isFromResident) return "From Resident";
   return MESSAGE_TYPE_LABELS[messageType];
 }
+
+/**
+ * Whether a message was authored by a resident rather than the Board/system. With shared
+ * property access, any resident linked to the address (not just the original submitter) may
+ * have authored it, so this checks "not a known board member and not the system", rather than
+ * comparing against one specific email.
+ */
+export function isResidentAuthor(authorId: string, boardMemberIds: ReadonlySet<string>): boolean {
+  return authorId !== "system" && !boardMemberIds.has(authorId);
+}

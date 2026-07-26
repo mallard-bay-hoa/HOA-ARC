@@ -13,8 +13,11 @@ const BOARD_COOKIE = "arc_board";
 
 export interface ResidentSession {
   email: string;
-  address?: string;
   name?: string;
+  phone?: string | null;
+  /** Every property this resident is linked to — a family member sharing a property, or one
+   * person owning more than one, both show up as multiple entries here. Empty until registered. */
+  addresses: string[];
 }
 
 export async function getResidentSession(): Promise<ResidentSession | null> {

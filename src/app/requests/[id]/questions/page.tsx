@@ -13,7 +13,7 @@ export default async function QuestionsPage({ params }: { params: Promise<{ id: 
   if (!session) redirect("/start");
 
   const request = await getRequestById(id);
-  if (!request || request.residentEmail !== session.email) notFound();
+  if (!request || !session.addresses.includes(request.address)) notFound();
 
   const category = getCategory(request.categorySlug);
   if (!category) notFound();

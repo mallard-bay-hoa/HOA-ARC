@@ -49,7 +49,6 @@ deliberately faked rather than left half-built:
 | Piece | File | Stub behavior | Real version |
 |---|---|---|---|
 | Auth | `src/lib/session.ts`, `src/lib/data/auth.ts` | Real Supabase Postgres-backed magic-link tokens (`src/lib/data/auth.ts`), but sessions are still unsigned cookies; a "simulate clicking the emailed link" button stands in for a real email | Supabase Auth magic-link sign-in + signed sessions (DESIGN.md §3) |
-| File storage | `src/lib/drive.ts` | Records file metadata only, never persists bytes | Google Drive API via a service account on a Shared Drive (DESIGN.md §5) |
 | Email | `src/lib/email.ts` | Logs to the server console | Resend (DESIGN.md §7) |
 | Timers | date fields are computed and displayed | no daily job actually fires | Vercel Cron hitting an API route (DESIGN.md §6, doubles as the Supabase keep-alive) |
 
@@ -62,9 +61,11 @@ a question means editing its category file directly.
 `src/lib/data/*.ts` talks to a real Supabase Postgres project via
 `src/lib/data/supabase.ts` (service-role key, server-only). See
 [HANDOFF.md](./HANDOFF.md) for account access and the exact schema
-(`supabase/migrations/0001_initial_schema.sql`). File storage and email are
-still stubbed — fill in the rest of `.env.example` as those integrations
-come online.
+(`supabase/migrations/0001_initial_schema.sql`). File uploads are real too —
+persisted in a private Supabase Storage bucket via `src/lib/storage.ts`
+(`supabase/migrations/0002_properties_residents.sql` covers the
+properties/residents roster). Email is still stubbed — fill in the rest of
+`.env.example` as that integration comes online.
 
 ## A known rough edge
 

@@ -58,10 +58,11 @@ export interface Document {
   id: string;
   name: string;
   sizeBytes: number;
+  mimeType: string;
+  /** Path within the "documents" Supabase Storage bucket. */
+  storagePath: string;
   uploadedBy: string;
   uploadedAt: string;
-  /** true once real Google Drive upload is wired up; for now these are metadata-only stubs */
-  persistedToDrive: boolean;
 }
 
 export interface BoardComment {

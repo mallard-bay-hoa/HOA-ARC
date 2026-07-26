@@ -1,11 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 import { getBoardSession } from "@/lib/session";
-import { getRequestById, getBoardComments, getOfficialMessages, getVotes } from "@/lib/data/requests";
+import { getRequestById, getBoardComments, getOfficialMessages, getVotes, boardMembers } from "@/lib/data/requests";
 import { getCategory } from "@/lib/domain/categories";
 import { formatAnswerEntries } from "@/lib/domain/answer-display";
-import { messageTypeLabel } from "@/lib/domain/message-display";
+import { messageTypeLabel, isResidentAuthor } from "@/lib/domain/message-display";
 import { TopBar } from "@/components/TopBar";
 import { Card, StatusPill, FlagRow, Button } from "@/components/ui";
+import { DocumentLinks } from "@/components/DocumentLinks";
 import { BoardTabs } from "./BoardTabs";
 import { addCommentAction, requestInfoAction, castVoteAction } from "./actions";
 
@@ -21,6 +22,7 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
   const messages = (await getOfficialMessages(id)).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   const votes = await getVotes(id);
   const category = getCategory(request.categorySlug);
+  const boardMemberIds = new Set((await boardMembers()).map((m) => m.id));
 
   const isOwnRequest = request.address === member.address;
   const myVote = votes.find((v) => v.boardMemberId === member.id);
@@ -70,9 +72,11 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
       ) : (
         <ul className="space-y-1 text-sm text-slate-700">
           {request.documents.map((d) => (
-            <li key={d.id}>
-              {d.name} ({Math.round(d.sizeBytes / 1024)} KB)
-              {!d.persistedToDrive && <span className="ml-2 text-xs text-amber-700">— not yet saved to Drive</span>}
+            <li key={d.id} className="flex items-center justify-between gap-3">
+              <span>
+                {d.name} ({Math.round(d.sizeBytes / 1024)} KB)
+              </span>
+              <DocumentLinks requestId={request.id} documentId={d.id} />
             </li>
           ))}
         </ul>
@@ -106,7 +110,7 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Messages to the resident</p>
         <div className="space-y-2">
           {messages.map((m) => {
-            const isFromResident = m.authorId === request.residentEmail;
+            const isFromResident = isResidentAuthor(m.authorId, boardMemberIds);
             return (
               <div
                 key={m.id}

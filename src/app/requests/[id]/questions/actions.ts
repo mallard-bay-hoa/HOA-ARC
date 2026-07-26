@@ -10,7 +10,7 @@ export async function saveAnswersAndContinue(requestId: string, answers: Record<
   if (!session) redirect("/start");
 
   const request = await getRequestById(requestId);
-  if (!request || request.residentEmail !== session.email) {
+  if (!request || !session.addresses.includes(request.address)) {
     throw new Error("Not found");
   }
 

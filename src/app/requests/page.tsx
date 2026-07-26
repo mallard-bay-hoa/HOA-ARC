@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getResidentSession } from "@/lib/session";
-import { getRequestsByEmail } from "@/lib/data/requests";
+import { getRequestsByAddresses } from "@/lib/data/requests";
 import { getCategory } from "@/lib/domain/categories";
 import { TopBar } from "@/components/TopBar";
 import { Card, StatusPill, Button } from "@/components/ui";
@@ -10,11 +10,15 @@ export default async function MyRequestsPage() {
   const session = await getResidentSession();
   if (!session) redirect("/start");
 
-  const requests = await getRequestsByEmail(session.email);
+  const requests = await getRequestsByAddresses(session.addresses);
+  const showAddressPerRow = session.addresses.length > 1;
 
   return (
     <>
-      <TopBar eyebrow="Mallard Bay ARC" title={session.address ?? "My Requests"} />
+      <TopBar
+        eyebrow="Mallard Bay ARC"
+        title={session.addresses.length === 1 ? session.addresses[0] : "My Requests"}
+      />
       <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
         <Card>
           <h2 className="text-base font-semibold text-slate-900">Your requests</h2>
@@ -28,7 +32,10 @@ export default async function MyRequestsPage() {
               >
                 <div>
                   <div className="text-sm font-semibold text-slate-800">{getCategory(r.categorySlug)?.name}</div>
-                  <div className="text-xs text-slate-500">Submitted {new Date(r.submittedAt ?? r.createdAt).toLocaleDateString()}</div>
+                  <div className="text-xs text-slate-500">
+                    {showAddressPerRow && <>{r.address} &middot; </>}
+                    Submitted {new Date(r.submittedAt ?? r.createdAt).toLocaleDateString()}
+                  </div>
                 </div>
                 <StatusPill status={r.status} />
               </Link>

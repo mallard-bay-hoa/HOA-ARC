@@ -4,14 +4,14 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getResidentSession } from "@/lib/session";
 import { getRequestById, submitRequest, addDocument } from "@/lib/data/requests";
-import { uploadToDrive, hasAllowedDocumentExtension } from "@/lib/drive";
+import { uploadDocumentFile, hasAllowedDocumentExtension } from "@/lib/storage";
 
 export async function submitAction(requestId: string) {
   const session = await getResidentSession();
   if (!session) redirect("/start");
 
   const request = await getRequestById(requestId);
-  if (!request || request.residentEmail !== session.email) throw new Error("Not found");
+  if (!request || !session.addresses.includes(request.address)) throw new Error("Not found");
 
   await submitRequest(requestId);
   redirect(`/requests/${requestId}`);
@@ -26,7 +26,7 @@ export async function uploadDocumentAction(
   if (!session) redirect("/start");
 
   const request = await getRequestById(requestId);
-  if (!request || request.residentEmail !== session.email) throw new Error("Not found");
+  if (!request || !session.addresses.includes(request.address)) throw new Error("Not found");
 
   const files = (formData.getAll("file") as File[]).filter((f) => f.size > 0);
   if (files.length === 0) return { error: "Choose at least one file first." };
@@ -38,21 +38,15 @@ export async function uploadDocumentAction(
 
   for (const file of files) {
     const bytes = new Uint8Array(await file.arrayBuffer());
-    const result = await uploadToDrive({
-      name: file.name,
-      bytes,
-      mimeType: file.type,
-      requestId,
-      categorySlug: request.categorySlug,
-      address: request.address,
-    });
+    const result = await uploadDocumentFile({ name: file.name, bytes, mimeType: file.type, requestId });
 
     await addDocument(requestId, {
       name: file.name,
       sizeBytes: file.size,
+      mimeType: file.type,
+      storagePath: result.storagePath,
       uploadedBy: session.email,
       uploadedAt: new Date().toISOString(),
-      persistedToDrive: result.persistedToDrive,
     });
   }
 

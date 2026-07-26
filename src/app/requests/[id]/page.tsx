@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getResidentSession } from "@/lib/session";
-import { getRequestById, getOfficialMessages } from "@/lib/data/requests";
+import { getRequestById, getOfficialMessages, boardMembers } from "@/lib/data/requests";
 import { getCategory } from "@/lib/domain/categories";
+import { isResidentAuthor } from "@/lib/domain/message-display";
 import { TopBar } from "@/components/TopBar";
 import { Card, StatusPill, Button } from "@/components/ui";
+import { DocumentLinks } from "@/components/DocumentLinks";
 import { removeDocumentAction } from "./actions";
 
 export default async function RequestDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -13,12 +15,13 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
   if (!session) redirect("/start");
 
   const request = await getRequestById(id);
-  if (!request || request.residentEmail !== session.email) notFound();
+  if (!request || !session.addresses.includes(request.address)) notFound();
 
   if (request.status === "draft") redirect(`/requests/${id}/questions`);
 
   const messages = (await getOfficialMessages(id)).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   const category = getCategory(request.categorySlug);
+  const boardMemberIds = new Set((await boardMembers()).map((m) => m.id));
 
   return (
     <>
@@ -40,14 +43,16 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
         <Card>
           <h2 className="mb-2 text-sm font-semibold text-slate-800">Messages from the Board</h2>
           {messages.map((m) => {
-            const isFromResident = m.authorId === request.residentEmail;
+            const isSelf = m.authorId === session.email;
+            const isFromResident = isResidentAuthor(m.authorId, boardMemberIds);
+            const authorLabel = isSelf ? "You" : isFromResident ? "Household" : "The Board";
             return (
               <div
                 key={m.id}
                 className={`border-t border-slate-100 py-3 first:border-t-0 ${isFromResident ? "ml-4 border-l-2 border-emerald-200 pl-3" : ""}`}
               >
                 <div className="text-xs font-mono uppercase tracking-wide text-slate-500">
-                  {`${new Date(m.createdAt).toLocaleDateString()} — ${isFromResident ? "You" : "The Board"}`}
+                  {`${new Date(m.createdAt).toLocaleDateString()} — ${authorLabel}`}
                 </div>
                 <div className="mt-1 text-sm text-slate-700">{m.body}</div>
                 {m.citedSections.length > 0 && (
@@ -76,11 +81,14 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
               {request.documents.map((d) => (
                 <li key={d.id} className="flex items-center justify-between gap-3">
                   <span>{d.name}</span>
-                  <form action={removeDocumentAction.bind(null, request.id, d.id)}>
-                    <button type="submit" className="text-xs text-rose-700 hover:underline">
-                      Remove
-                    </button>
-                  </form>
+                  <span className="flex shrink-0 items-center gap-3">
+                    <DocumentLinks requestId={request.id} documentId={d.id} />
+                    <form action={removeDocumentAction.bind(null, request.id, d.id)}>
+                      <button type="submit" className="text-xs text-rose-700 hover:underline">
+                        Remove
+                      </button>
+                    </form>
+                  </span>
                 </li>
               ))}
             </ul>

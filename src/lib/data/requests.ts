@@ -220,25 +220,11 @@ export async function getRequestById(id: string): Promise<ArcRequest | undefined
   return rowToRequest(data as RequestRow);
 }
 
-/** Looks up whether this email already has a name/address on file from a past request. */
-export async function getKnownResidentInfo(email: string): Promise<{ name: string; address: string } | null> {
-  const { data, error } = await supabase
-    .from("requests")
-    .select("resident_name, address")
-    .ilike("resident_email", email)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (error || !data) return null;
-  return { name: data.resident_name, address: data.address };
-}
-
-export async function getRequestsByEmail(email: string): Promise<ArcRequest[]> {
-  const { data, error } = await supabase
-    .from("requests")
-    .select("*")
-    .ilike("resident_email", email)
-    .neq("status", "draft");
+/** All non-draft requests for any of a resident's addresses — this is what makes a shared
+ * property's requests visible to every resident linked to it, not just whoever submitted them. */
+export async function getRequestsByAddresses(addresses: string[]): Promise<ArcRequest[]> {
+  if (addresses.length === 0) return [];
+  const { data, error } = await supabase.from("requests").select("*").in("address", addresses).neq("status", "draft");
   if (error || !data) return [];
   return (data as RequestRow[]).map(rowToRequest).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }

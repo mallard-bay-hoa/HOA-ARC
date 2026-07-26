@@ -13,7 +13,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
   if (!session) redirect("/start");
 
   const request = await getRequestById(id);
-  if (!request || request.residentEmail !== session.email) notFound();
+  if (!request || !session.addresses.includes(request.address)) notFound();
 
   const hasGovViolation = request.flags.some((f) => f.type === "government_violation");
   const boundSubmit = submitAction.bind(null, request.id);

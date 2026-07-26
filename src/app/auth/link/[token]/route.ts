@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { consumeMagicLink } from "@/lib/data/auth";
-import { getKnownResidentInfo } from "@/lib/data/requests";
+import { getResidentByEmail } from "@/lib/data/residents";
 import { setResidentSession } from "@/lib/session";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ token: string }> }) {
@@ -11,7 +11,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
     redirect("/start?error=invalid-link");
   }
 
-  const known = await getKnownResidentInfo(link.email);
-  await setResidentSession({ email: link.email, name: known?.name, address: known?.address });
+  const known = await getResidentByEmail(link.email);
+  await setResidentSession({
+    email: link.email,
+    name: known?.name,
+    phone: known?.phone,
+    addresses: known?.addresses ?? [],
+  });
   redirect("/requests");
 }

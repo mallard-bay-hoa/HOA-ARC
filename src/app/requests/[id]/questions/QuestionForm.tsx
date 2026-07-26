@@ -48,12 +48,6 @@ export function QuestionForm({
 
   return (
     <div>
-      <div className="mb-4 h-1.5 rounded-full bg-slate-200">
-        <div
-          className="h-1.5 rounded-full bg-emerald-600 transition-all"
-          style={{ width: `${Math.min(100, (visible.length / totalKnown) * 100)}%` }}
-        />
-      </div>
       <p className="mb-4 text-xs text-slate-500">
         {visible.filter((q) => isAnswered(q, answers[q.id])).length} of ~{totalKnown} questions &middot; {categoryName}
       </p>

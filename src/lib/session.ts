@@ -55,3 +55,13 @@ export async function setBoardSession(memberId: string): Promise<void> {
     maxAge: 60 * 60 * 24 * 30,
   });
 }
+
+export async function clearResidentSession(): Promise<void> {
+  const store = await cookies();
+  store.delete(RESIDENT_COOKIE);
+}
+
+export async function clearBoardSession(): Promise<void> {
+  const store = await cookies();
+  store.delete(BOARD_COOKIE);
+}

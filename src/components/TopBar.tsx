@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { getResidentSession, getBoardSession } from "@/lib/session";
+import { signOut } from "@/app/actions";
 
-export function TopBar({
+export async function TopBar({
   eyebrow,
   title,
   right,
@@ -9,6 +11,9 @@ export function TopBar({
   title: string;
   right?: React.ReactNode;
 }) {
+  const [resident, board] = await Promise.all([getResidentSession(), getBoardSession()]);
+  const signedIn = Boolean(resident || board);
+
   return (
     <header className="border-b border-slate-200 bg-white">
       <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
@@ -18,7 +23,16 @@ export function TopBar({
           </Link>
           <h1 className="text-lg font-semibold text-slate-900">{title}</h1>
         </div>
-        {right}
+        <div className="flex items-center gap-4">
+          {right}
+          {signedIn && (
+            <form action={signOut}>
+              <button type="submit" className="text-sm text-slate-500 hover:text-slate-700 hover:underline">
+                Sign out
+              </button>
+            </form>
+          )}
+        </div>
       </div>
     </header>
   );

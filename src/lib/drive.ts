@@ -15,6 +15,16 @@ export interface UploadResult {
   persistedToDrive: boolean;
 }
 
+// Requirements §10 file-type allowlist. Checked by extension rather than
+// browser-reported MIME type alone, since some browsers send a generic
+// type (or none) for .doc/.docx.
+export const ALLOWED_DOCUMENT_EXTENSIONS = [".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png"];
+
+export function hasAllowedDocumentExtension(filename: string): boolean {
+  const lower = filename.toLowerCase();
+  return ALLOWED_DOCUMENT_EXTENSIONS.some((ext) => lower.endsWith(ext));
+}
+
 export async function uploadToDrive(file: {
   name: string;
   bytes: Uint8Array;

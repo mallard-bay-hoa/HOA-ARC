@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getResidentSession } from "@/lib/session";
 import { getRequestById, submitRequest, addDocument } from "@/lib/data/requests";
-import { uploadToDrive } from "@/lib/drive";
+import { uploadToDrive, hasAllowedDocumentExtension } from "@/lib/drive";
 
 export async function submitAction(requestId: string) {
   const session = await getResidentSession();
@@ -17,7 +17,11 @@ export async function submitAction(requestId: string) {
   redirect(`/requests/${requestId}`);
 }
 
-export async function uploadDocumentAction(requestId: string, formData: FormData) {
+export async function uploadDocumentAction(
+  requestId: string,
+  _prevState: { error?: string } | undefined,
+  formData: FormData
+): Promise<{ error?: string } | undefined> {
   const session = await getResidentSession();
   if (!session) redirect("/start");
 
@@ -25,7 +29,10 @@ export async function uploadDocumentAction(requestId: string, formData: FormData
   if (!request || request.residentEmail !== session.email) throw new Error("Not found");
 
   const file = formData.get("file") as File | null;
-  if (!file || file.size === 0) return;
+  if (!file || file.size === 0) return { error: "Choose a file first." };
+  if (!hasAllowedDocumentExtension(file.name)) {
+    return { error: "Only PDF, Word (.doc/.docx), JPG, or PNG files are allowed." };
+  }
 
   const bytes = new Uint8Array(await file.arrayBuffer());
   const result = await uploadToDrive({

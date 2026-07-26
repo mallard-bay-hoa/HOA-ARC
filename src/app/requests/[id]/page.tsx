@@ -42,7 +42,10 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
           {messages.map((m) => {
             const isFromResident = m.authorId === request.residentEmail;
             return (
-              <div key={m.id} className="border-t border-slate-100 py-3 first:border-t-0">
+              <div
+                key={m.id}
+                className={`border-t border-slate-100 py-3 first:border-t-0 ${isFromResident ? "ml-4 border-l-2 border-emerald-200 pl-3" : ""}`}
+              >
                 <div className="text-xs font-mono uppercase tracking-wide text-slate-500">
                   {`${new Date(m.createdAt).toLocaleDateString()} — ${isFromResident ? "You" : "The Board"}`}
                 </div>

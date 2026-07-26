@@ -2,6 +2,8 @@ import { notFound, redirect } from "next/navigation";
 import { getBoardSession } from "@/lib/session";
 import { getRequestById, getBoardComments, getOfficialMessages, getVotes } from "@/lib/data/requests";
 import { getCategory } from "@/lib/domain/categories";
+import { formatAnswerEntries } from "@/lib/domain/answer-display";
+import { messageTypeLabel } from "@/lib/domain/message-display";
 import { TopBar } from "@/components/TopBar";
 import { Card, StatusPill, FlagRow, Button } from "@/components/ui";
 import { BoardTabs } from "./BoardTabs";
@@ -42,10 +44,10 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
       <div>
         <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Answers</p>
         <dl className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-          {Object.entries(request.answers).map(([k, v]) => (
-            <div key={k} className="contents">
-              <dt className="text-slate-500">{k}</dt>
-              <dd className="text-slate-800">{Array.isArray(v) ? v.join(", ") : String(v)}</dd>
+          {formatAnswerEntries(request.categorySlug, request.answers).map(({ id, label, value }) => (
+            <div key={id} className="contents">
+              <dt className="text-slate-500">{label}</dt>
+              <dd className="text-slate-800">{value}</dd>
             </div>
           ))}
         </dl>
@@ -103,19 +105,25 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
       <div>
         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Messages to the resident</p>
         <div className="space-y-2">
-          {messages.map((m) => (
-            <div key={m.id} className="border-t border-slate-100 pt-2 text-sm">
-              <div className="text-xs font-mono uppercase tracking-wide text-slate-500">
-                {`${new Date(m.createdAt).toLocaleDateString()} — ${m.messageType}`}
-              </div>
-              <div className="text-slate-700">{m.body}</div>
-              {m.citedSections.length > 0 && (
-                <div className="mt-1 text-xs text-slate-500">
-                  {m.messageType === "approved_conditional" ? "Conditions" : "Citing"}: {m.citedSections.join(", ")}
+          {messages.map((m) => {
+            const isFromResident = m.authorId === request.residentEmail;
+            return (
+              <div
+                key={m.id}
+                className={`border-t border-slate-100 pt-2 text-sm ${isFromResident ? "ml-4 border-l-2 border-emerald-200 pl-3" : ""}`}
+              >
+                <div className="text-xs font-mono uppercase tracking-wide text-slate-500">
+                  {`${new Date(m.createdAt).toLocaleDateString()} — ${messageTypeLabel(m.messageType, isFromResident)}`}
                 </div>
-              )}
-            </div>
-          ))}
+                <div className="text-slate-700">{m.body}</div>
+                {m.citedSections.length > 0 && (
+                  <div className="mt-1 text-xs text-slate-500">
+                    {m.messageType === "approved_conditional" ? "Conditions" : "Citing"}: {m.citedSections.join(", ")}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
         {!decided && (
           <form action={boundInfoRequest} className="mt-3 flex gap-2">

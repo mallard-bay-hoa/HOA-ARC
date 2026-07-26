@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getResidentSession } from "@/lib/session";
 import { getRequestById } from "@/lib/data/requests";
@@ -21,6 +22,9 @@ export default async function QuestionsPage({ params }: { params: Promise<{ id: 
     <>
       <TopBar eyebrow="Mallard Bay ARC" title={`New Request — ${category.name}`} />
       <main className="mx-auto w-full max-w-xl flex-1 px-6 py-10">
+        <Link href="/requests/new" className="mb-4 inline-block text-sm text-slate-500 hover:text-slate-700">
+          &larr; Choose a different category
+        </Link>
         <Card>
           <QuestionForm
             requestId={request.id}

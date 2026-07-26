@@ -9,12 +9,6 @@ export function StartForm() {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <Field label="Full name">
-        <input name="name" required className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-      </Field>
-      <Field label="Property address">
-        <input name="address" required placeholder="123 Mallard Bay Dr" className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-      </Field>
       <Field label="Email address">
         <input name="email" type="email" required className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
       </Field>

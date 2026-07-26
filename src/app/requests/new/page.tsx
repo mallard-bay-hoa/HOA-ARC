@@ -2,11 +2,32 @@ import { redirect } from "next/navigation";
 import { getResidentSession } from "@/lib/session";
 import { CATEGORIES } from "@/lib/domain/categories";
 import { TopBar } from "@/components/TopBar";
+import { Card } from "@/components/ui";
 import { startCategory } from "./actions";
+import { ResidentDetailsForm } from "./ResidentDetailsForm";
 
 export default async function NewRequestPage() {
   const session = await getResidentSession();
   if (!session) redirect("/start");
+
+  if (!session.name || !session.address) {
+    return (
+      <>
+        <TopBar eyebrow="Mallard Bay ARC" title="A couple more details" />
+        <main className="mx-auto w-full max-w-md flex-1 px-6 py-10">
+          <Card>
+            <h2 className="text-base font-semibold text-slate-900">Tell us who you are</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              We don&rsquo;t have a name or property address on file for this email yet.
+            </p>
+            <div className="mt-6">
+              <ResidentDetailsForm />
+            </div>
+          </Card>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>

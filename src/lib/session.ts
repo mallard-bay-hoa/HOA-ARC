@@ -13,8 +13,8 @@ const BOARD_COOKIE = "arc_board";
 
 export interface ResidentSession {
   email: string;
-  address: string;
-  name: string;
+  address?: string;
+  name?: string;
 }
 
 export async function getResidentSession(): Promise<ResidentSession | null> {

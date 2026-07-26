@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { getCategoryModule } from "@/lib/domain/registry";
 import type { Answer, Question } from "@/lib/domain/types";
 import { Button, Field } from "@/components/ui";
@@ -26,6 +27,7 @@ export function QuestionForm({
 }) {
   const [answers, setAnswers] = useState<Record<string, Answer>>(initialAnswers);
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
   const categoryModule = getCategoryModule(categorySlug);
   const visible = categoryModule?.visibleQuestions(answers) ?? [];
   const totalKnown = categoryModule?.questions.length ?? 0;
@@ -145,6 +147,9 @@ export function QuestionForm({
           onClick={() => startTransition(() => saveAnswersAndContinue(requestId, answers))}
         >
           {pending ? "Saving…" : "Continue"}
+        </Button>
+        <Button type="button" variant="ghost" disabled={pending} onClick={() => router.push("/requests/new")}>
+          Cancel
         </Button>
       </div>
     </div>

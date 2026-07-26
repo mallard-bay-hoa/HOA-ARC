@@ -9,31 +9,17 @@ import { supabase } from "./supabase";
 const RESIDENT_COOKIE = "arc_resident";
 const BOARD_COOKIE = "arc_board";
 
-export interface ResidentSession {
-  email: string;
-  address: string;
-  name: string;
-}
-
-export async function issueMagicLink(email: string, address: string, name: string): Promise<string> {
-  const { data, error } = await supabase
-    .from("magic_links")
-    .insert({ email, address, name })
-    .select("token")
-    .single();
+export async function issueMagicLink(email: string): Promise<string> {
+  const { data, error } = await supabase.from("magic_links").insert({ email }).select("token").single();
   if (error) throw new Error(error.message);
   return data.token as string;
 }
 
-export async function consumeMagicLink(token: string): Promise<ResidentSession | null> {
-  const { data: link, error } = await supabase
-    .from("magic_links")
-    .select("email, address, name")
-    .eq("token", token)
-    .single();
+export async function consumeMagicLink(token: string): Promise<{ email: string } | null> {
+  const { data: link, error } = await supabase.from("magic_links").select("email").eq("token", token).single();
   if (error || !link) return null;
   await supabase.from("magic_links").update({ used_at: new Date().toISOString() }).eq("token", token);
-  return { email: link.email, address: link.address, name: link.name };
+  return { email: link.email };
 }
 
 export { RESIDENT_COOKIE, BOARD_COOKIE };

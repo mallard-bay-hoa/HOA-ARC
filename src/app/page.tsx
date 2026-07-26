@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { Card, Button } from "@/components/ui";
+import { getResidentSession, getBoardSession } from "@/lib/session";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [residentSession, boardSession] = await Promise.all([getResidentSession(), getBoardSession()]);
+
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center gap-8 px-6 py-16 text-center">
       <div>
@@ -17,14 +20,14 @@ export default function HomePage() {
         <Card className="flex flex-col items-start gap-3">
           <div className="text-sm font-semibold text-slate-800">Residents</div>
           <p className="text-sm text-slate-600">Start or check on an architectural request.</p>
-          <Link href="/start" className="w-full">
-            <Button className="w-full">Start a Request</Button>
+          <Link href={residentSession ? "/requests" : "/start"} className="w-full">
+            <Button className="w-full">My Requests</Button>
           </Link>
         </Card>
         <Card className="flex flex-col items-start gap-3">
           <div className="text-sm font-semibold text-slate-800">Board Members</div>
           <p className="text-sm text-slate-600">Review, discuss, and vote on submitted requests.</p>
-          <Link href="/board/signin" className="w-full">
+          <Link href={boardSession ? "/board" : "/board/signin"} className="w-full">
             <Button variant="ghost" className="w-full">
               Board Sign In
             </Button>

@@ -220,6 +220,19 @@ export async function getRequestById(id: string): Promise<ArcRequest | undefined
   return rowToRequest(data as RequestRow);
 }
 
+/** Looks up whether this email already has a name/address on file from a past request. */
+export async function getKnownResidentInfo(email: string): Promise<{ name: string; address: string } | null> {
+  const { data, error } = await supabase
+    .from("requests")
+    .select("resident_name, address")
+    .ilike("resident_email", email)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error || !data) return null;
+  return { name: data.resident_name, address: data.address };
+}
+
 export async function getRequestsByEmail(email: string): Promise<ArcRequest[]> {
   const { data, error } = await supabase
     .from("requests")

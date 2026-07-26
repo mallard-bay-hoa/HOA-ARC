@@ -14,7 +14,7 @@ export default async function MyRequestsPage() {
 
   return (
     <>
-      <TopBar eyebrow="Mallard Bay ARC" title={session.address} />
+      <TopBar eyebrow="Mallard Bay ARC" title={session.address ?? "My Requests"} />
       <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
         <Card>
           <h2 className="text-base font-semibold text-slate-900">Your requests</h2>

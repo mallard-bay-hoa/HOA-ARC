@@ -24,7 +24,7 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
   const category = getCategory(request.categorySlug);
   const boardMemberIds = new Set((await boardMembers()).map((m) => m.id));
 
-  const isOwnRequest = request.address === member.address;
+  const isOwnRequest = member.addresses.includes(request.address);
   const myVote = votes.find((v) => v.boardMemberId === member.id);
   const approveCount = votes.filter((v) => v.decision === "approve").length;
   const denyCount = votes.filter((v) => v.decision === "deny").length;

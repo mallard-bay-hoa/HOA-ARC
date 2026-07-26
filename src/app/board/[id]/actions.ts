@@ -54,7 +54,7 @@ export async function castVoteAction(requestId: string, decision: VoteDecision, 
     .map((s) => s.trim())
     .filter(Boolean);
 
-  const request = await castVote(requestId, member.id, member.address, decision, citedSections);
+  const request = await castVote(requestId, member.id, member.addresses, decision, citedSections);
 
   const label = DECISION_LABEL[request.status];
   if (label) {

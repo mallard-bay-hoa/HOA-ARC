@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { consumeMagicLink } from "@/lib/data/auth";
-import { getResidentByEmail } from "@/lib/data/residents";
-import { setResidentSession } from "@/lib/session";
+import { getResidentByEmail, getBoardMemberByEmail } from "@/lib/data/residents";
+import { setResidentSession, setBoardSession } from "@/lib/session";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
@@ -9,6 +9,13 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
 
   if (!link) {
     redirect("/start?error=invalid-link");
+  }
+
+  if (link.purpose === "board") {
+    const member = await getBoardMemberByEmail(link.email);
+    if (!member) redirect("/board/signin?error=invalid-link");
+    await setBoardSession(member.id);
+    redirect("/board");
   }
 
   const known = await getResidentByEmail(link.email);

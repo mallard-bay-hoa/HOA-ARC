@@ -9,17 +9,19 @@ import { supabase } from "./supabase";
 const RESIDENT_COOKIE = "arc_resident";
 const BOARD_COOKIE = "arc_board";
 
-export async function issueMagicLink(email: string): Promise<string> {
-  const { data, error } = await supabase.from("magic_links").insert({ email }).select("token").single();
+export type MagicLinkPurpose = "resident" | "board";
+
+export async function issueMagicLink(email: string, purpose: MagicLinkPurpose = "resident"): Promise<string> {
+  const { data, error } = await supabase.from("magic_links").insert({ email, purpose }).select("token").single();
   if (error) throw new Error(error.message);
   return data.token as string;
 }
 
-export async function consumeMagicLink(token: string): Promise<{ email: string } | null> {
-  const { data: link, error } = await supabase.from("magic_links").select("email").eq("token", token).single();
+export async function consumeMagicLink(token: string): Promise<{ email: string; purpose: MagicLinkPurpose } | null> {
+  const { data: link, error } = await supabase.from("magic_links").select("email, purpose").eq("token", token).single();
   if (error || !link) return null;
   await supabase.from("magic_links").update({ used_at: new Date().toISOString() }).eq("token", token);
-  return { email: link.email };
+  return { email: link.email, purpose: link.purpose as MagicLinkPurpose };
 }
 
 export { RESIDENT_COOKIE, BOARD_COOKIE };

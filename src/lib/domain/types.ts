@@ -51,7 +51,7 @@ export interface BoardMember {
   id: string;
   name: string;
   email: string;
-  address: string; // board members are also residents (Requirements §2)
+  addresses: string[]; // board members are also residents (Requirements §2)
 }
 
 export interface Document {

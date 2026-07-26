@@ -1,6 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
-import { boardMembers } from "./data/requests";
+import { getBoardMemberById } from "./data/residents";
 import type { BoardMember } from "./domain/types";
 
 // TEMPORARY dev sessions — plain (unsigned) cookies. DESIGN.md §3 specifies
@@ -45,8 +45,7 @@ export async function getBoardSession(): Promise<BoardMember | null> {
   const store = await cookies();
   const id = store.get(BOARD_COOKIE)?.value;
   if (!id) return null;
-  const members = await boardMembers();
-  return members.find((m) => m.id === id) ?? null;
+  return getBoardMemberById(id);
 }
 
 export async function setBoardSession(memberId: string): Promise<void> {

@@ -2,6 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { supabase } from "./supabase";
 import { getCategoryModule } from "../domain/registry";
+import { getAllBoardMembers } from "./residents";
 import type {
   Answer,
   ArcRequest,
@@ -350,13 +351,13 @@ export async function getVotes(requestId: string): Promise<Vote[]> {
 export async function castVote(
   requestId: string,
   boardMemberId: string,
-  boardMemberAddress: string,
+  boardMemberAddresses: string[],
   decision: VoteDecision,
   citedSections: string[]
 ): Promise<ArcRequest> {
   const request = await fetchRequest(requestId);
 
-  if (request.address === boardMemberAddress) {
+  if (boardMemberAddresses.includes(request.address)) {
     throw new Error("Board members cannot vote on their own request.");
   }
   if (decision === "deny" && citedSections.length === 0) {
@@ -456,7 +457,5 @@ export function dueChip(request: ArcRequest): { label: string; urgency: DueUrgen
 }
 
 export async function boardMembers(): Promise<BoardMember[]> {
-  const { data, error } = await supabase.from("board_members").select("*");
-  if (error || !data) return [];
-  return data as BoardMember[];
+  return getAllBoardMembers();
 }

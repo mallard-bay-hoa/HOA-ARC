@@ -1,10 +1,22 @@
 import "server-only";
 import { supabase } from "./supabase";
+import type { BoardMember } from "../domain/types";
 
 export interface ResidentInfo {
   name: string;
   phone: string | null;
   addresses: string[];
+}
+
+async function getAddressesForResidentId(residentId: string): Promise<string[]> {
+  const { data: links } = await supabase
+    .from("resident_properties")
+    .select("properties(address)")
+    .eq("resident_id", residentId);
+
+  return (links ?? [])
+    .map((l) => (l as unknown as { properties: { address: string } | null }).properties?.address)
+    .filter((a): a is string => typeof a === "string");
 }
 
 /** Looks up a resident by email and every property they're linked to (a resident can be linked to more than one). */
@@ -16,16 +28,53 @@ export async function getResidentByEmail(email: string): Promise<ResidentInfo | 
     .maybeSingle();
   if (error || !resident) return null;
 
-  const { data: links } = await supabase
-    .from("resident_properties")
-    .select("properties(address)")
-    .eq("resident_id", resident.id);
-
-  const addresses = (links ?? [])
-    .map((l) => (l as unknown as { properties: { address: string } | null }).properties?.address)
-    .filter((a): a is string => typeof a === "string");
-
+  const addresses = await getAddressesForResidentId(resident.id);
   return { name: resident.name, phone: resident.phone, addresses };
+}
+
+/** Residents flagged as board members — just their id/name, for the sign-in page's list of names. */
+export async function getBoardMemberCandidates(): Promise<{ id: string; name: string }[]> {
+  const { data, error } = await supabase.from("residents").select("id, name").eq("is_board_member", true).order("name");
+  if (error || !data) return [];
+  return data;
+}
+
+/** A single board member's full info (email included, for sending their magic link) — never exposed to the sign-in page directly. */
+export async function getBoardMemberById(id: string): Promise<BoardMember | null> {
+  const { data: resident, error } = await supabase
+    .from("residents")
+    .select("id, name, email")
+    .eq("id", id)
+    .eq("is_board_member", true)
+    .maybeSingle();
+  if (error || !resident) return null;
+
+  const addresses = await getAddressesForResidentId(resident.id);
+  return { id: resident.id, name: resident.name, email: resident.email, addresses };
+}
+
+/** Looks up a board member by email — used when consuming a board magic link to grant the right session. */
+export async function getBoardMemberByEmail(email: string): Promise<BoardMember | null> {
+  const { data: resident, error } = await supabase
+    .from("residents")
+    .select("id, name, email")
+    .ilike("email", email)
+    .eq("is_board_member", true)
+    .maybeSingle();
+  if (error || !resident) return null;
+
+  const addresses = await getAddressesForResidentId(resident.id);
+  return { id: resident.id, name: resident.name, email: resident.email, addresses };
+}
+
+/** Every board member — used to attribute messages/comments to "the Board" vs a household. */
+export async function getAllBoardMembers(): Promise<BoardMember[]> {
+  const { data, error } = await supabase.from("residents").select("id, name, email").eq("is_board_member", true).order("name");
+  if (error || !data) return [];
+
+  return Promise.all(
+    data.map(async (r) => ({ id: r.id, name: r.name, email: r.email, addresses: await getAddressesForResidentId(r.id) }))
+  );
 }
 
 async function getOrCreatePropertyId(address: string): Promise<string> {

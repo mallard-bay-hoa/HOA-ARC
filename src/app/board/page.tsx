@@ -31,9 +31,12 @@ export default async function BoardDashboardPage() {
               {requests.map((r) => {
                 const due = dueChip(r);
                 return (
-                  <tr key={r.id} className="border-b border-slate-100 last:border-b-0">
+                  <tr key={r.id} className="relative border-b border-slate-100 last:border-b-0 hover:bg-slate-50">
                     <td className="py-3">
-                      <Link href={`/board/${r.id}`} className="font-medium text-emerald-800 hover:underline">
+                      <Link
+                        href={`/board/${r.id}`}
+                        className="font-medium text-emerald-800 after:absolute after:inset-0 hover:underline"
+                      >
                         {r.address}
                       </Link>
                     </td>

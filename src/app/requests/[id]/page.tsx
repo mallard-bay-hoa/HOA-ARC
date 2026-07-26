@@ -5,6 +5,7 @@ import { getRequestById, getOfficialMessages } from "@/lib/data/requests";
 import { getCategory } from "@/lib/domain/categories";
 import { TopBar } from "@/components/TopBar";
 import { Card, StatusPill, Button } from "@/components/ui";
+import { removeDocumentAction } from "./actions";
 
 export default async function RequestDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -27,6 +28,9 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
         right={<StatusPill status={request.status} />}
       />
       <main className="mx-auto w-full max-w-xl flex-1 px-6 py-10">
+        <Link href="/requests" className="mb-4 inline-block text-sm text-slate-500 hover:text-slate-700">
+          &larr; Back to My Requests
+        </Link>
         {request.slaDueAt && ["in_review", "info_requested"].includes(request.status) && (
           <p className="mb-4 text-sm text-slate-500">
             Board response due by {new Date(request.slaDueAt).toLocaleDateString()}
@@ -67,7 +71,14 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
             <h2 className="mb-2 text-sm font-semibold text-slate-800">Documents</h2>
             <ul className="space-y-1 text-sm text-slate-600">
               {request.documents.map((d) => (
-                <li key={d.id}>{d.name}</li>
+                <li key={d.id} className="flex items-center justify-between gap-3">
+                  <span>{d.name}</span>
+                  <form action={removeDocumentAction.bind(null, request.id, d.id)}>
+                    <button type="submit" className="text-xs text-rose-700 hover:underline">
+                      Remove
+                    </button>
+                  </form>
+                </li>
               ))}
             </ul>
           </Card>

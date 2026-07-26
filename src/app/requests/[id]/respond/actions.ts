@@ -20,11 +20,13 @@ export async function respondToInfoRequest(
   const body = (formData.get("body") as string | null)?.trim();
   if (!body) return { error: "Enter a response before sending." };
 
-  const file = formData.get("file") as File | null;
-  if (file && file.size > 0) {
-    if (!hasAllowedDocumentExtension(file.name)) {
-      return { error: "Only PDF, Word (.doc/.docx), JPG, or PNG files are allowed." };
-    }
+  const files = (formData.getAll("file") as File[]).filter((f) => f.size > 0);
+  const invalid = files.find((f) => !hasAllowedDocumentExtension(f.name));
+  if (invalid) {
+    return { error: `"${invalid.name}" isn't an allowed file type. Only PDF, Word (.doc/.docx), JPG, or PNG are allowed.` };
+  }
+
+  for (const file of files) {
     const bytes = new Uint8Array(await file.arrayBuffer());
     const result = await uploadToDrive({
       name: file.name,

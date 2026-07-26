@@ -266,6 +266,21 @@ export async function addDocument(requestId: string, doc: Omit<Document, "id">):
   return rowToRequest(data as RequestRow);
 }
 
+export async function removeDocument(requestId: string, documentId: string): Promise<ArcRequest> {
+  const request = await fetchRequest(requestId);
+  const documents = request.documents.filter((d) => d.id !== documentId);
+  const now = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from("requests")
+    .update({ documents, updated_at: now })
+    .eq("id", requestId)
+    .select("*")
+    .single();
+  if (error || !data) throw new Error(error?.message ?? "Failed to remove document");
+  return rowToRequest(data as RequestRow);
+}
+
 export async function addBoardComment(
   requestId: string,
   authorId: string,

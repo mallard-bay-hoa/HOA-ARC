@@ -17,6 +17,13 @@ export interface RequestFlag {
   description: string;
 }
 
+/** A government or HOA rule shown to the resident before they certify compliance — no longer
+ * computed from answers; the resident's own attestation is the gate, not a software evaluation. */
+export interface Requirement {
+  citation: string;
+  description: string;
+}
+
 export type InputType = "text" | "textarea" | "number" | "boolean" | "select" | "multiselect";
 
 export interface Question {

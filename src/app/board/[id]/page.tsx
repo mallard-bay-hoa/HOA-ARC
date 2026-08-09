@@ -46,7 +46,7 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
       <div>
         <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Answers</p>
         <dl className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-          {formatAnswerEntries(request.categorySlug, request.answers).map(({ id, label, value }) => (
+          {formatAnswerEntries(request.answers).map(({ id, label, value }) => (
             <div key={id} className="contents">
               <dt className="text-slate-500">{label}</dt>
               <dd className="text-slate-800">{value}</dd>

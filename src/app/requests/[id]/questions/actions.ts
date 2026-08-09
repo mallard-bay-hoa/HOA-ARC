@@ -3,9 +3,12 @@
 import { redirect } from "next/navigation";
 import { getResidentSession } from "@/lib/session";
 import { getRequestById, saveAnswers } from "@/lib/data/requests";
-import type { Answer } from "@/lib/domain/types";
 
-export async function saveAnswersAndContinue(requestId: string, answers: Record<string, Answer>) {
+export async function saveCertificationAndContinue(
+  requestId: string,
+  _prevState: { error?: string } | undefined,
+  formData: FormData
+): Promise<{ error?: string } | undefined> {
   const session = await getResidentSession();
   if (!session) redirect("/start");
 
@@ -14,6 +17,16 @@ export async function saveAnswersAndContinue(requestId: string, answers: Record<
     throw new Error("Not found");
   }
 
-  await saveAnswers(requestId, answers);
+  const description = String(formData.get("description") ?? "").trim();
+  const certified = formData.get("certifiedCompliance") === "on";
+
+  if (!description) {
+    return { error: "Please describe your project." };
+  }
+  if (!certified) {
+    return { error: "You must certify that you understand and will comply with the requirements above." };
+  }
+
+  await saveAnswers(requestId, { description, certifiedCompliance: true });
   redirect(`/requests/${requestId}/review`);
 }

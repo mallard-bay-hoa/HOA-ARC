@@ -3,9 +3,10 @@ import { notFound, redirect } from "next/navigation";
 import { getResidentSession } from "@/lib/session";
 import { getRequestById } from "@/lib/data/requests";
 import { getCategory } from "@/lib/domain/categories";
+import { getCategoryModule } from "@/lib/domain/registry";
 import { TopBar } from "@/components/TopBar";
 import { Card } from "@/components/ui";
-import { QuestionForm } from "./QuestionForm";
+import { CertifyForm } from "./CertifyForm";
 
 export default async function QuestionsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -18,6 +19,9 @@ export default async function QuestionsPage({ params }: { params: Promise<{ id: 
   const category = getCategory(request.categorySlug);
   if (!category) notFound();
 
+  const requirements = getCategoryModule(request.categorySlug)?.requirements ?? [];
+  const initialDescription = typeof request.answers.description === "string" ? request.answers.description : "";
+
   return (
     <>
       <TopBar eyebrow="Mallard Bay ARC" title={`New Request — ${category.name}`} />
@@ -26,12 +30,7 @@ export default async function QuestionsPage({ params }: { params: Promise<{ id: 
           &larr; Choose a different category
         </Link>
         <Card>
-          <QuestionForm
-            requestId={request.id}
-            categorySlug={request.categorySlug}
-            categoryName={category.name}
-            initialAnswers={request.answers}
-          />
+          <CertifyForm requestId={request.id} requirements={requirements} initialDescription={initialDescription} />
         </Card>
       </main>
     </>

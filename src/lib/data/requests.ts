@@ -1,7 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { supabase } from "./supabase";
-import { getCategoryModule } from "../domain/registry";
 import { getAllBoardMembers } from "./residents";
 import type {
   Answer,
@@ -24,10 +23,6 @@ function addDays(iso: string, days: number): string {
   const d = new Date(iso);
   d.setDate(d.getDate() + days);
   return d.toISOString();
-}
-
-function evaluateFlags(categorySlug: string, answers: Record<string, Answer>): RequestFlag[] {
-  return getCategoryModule(categorySlug)?.evaluate(answers) ?? [];
 }
 
 interface RequestRow {
@@ -164,15 +159,18 @@ export async function createDraftRequest(input: {
   return rowToRequest(data as RequestRow);
 }
 
+/** Saves the resident's project description + compliance certification. No flag evaluation
+ * anymore — the certification checkbox is the gate, not a software-computed pass/fail
+ * (Requirements §7 decision). `flags` stays an empty array rather than being dropped, so the
+ * column (and anything reading it) still works if this is ever reverted. */
 export async function saveAnswers(requestId: string, answers: Record<string, Answer>): Promise<ArcRequest> {
   const request = await fetchRequest(requestId);
   const mergedAnswers = { ...request.answers, ...answers };
-  const flags = evaluateFlags(request.categorySlug, mergedAnswers);
   const now = new Date().toISOString();
 
   const { data, error } = await supabase
     .from("requests")
-    .update({ answers: mergedAnswers, flags, updated_at: now })
+    .update({ answers: mergedAnswers, updated_at: now })
     .eq("id", requestId)
     .select("*")
     .single();
@@ -181,13 +179,6 @@ export async function saveAnswers(requestId: string, answers: Record<string, Ans
 }
 
 export async function submitRequest(requestId: string): Promise<ArcRequest> {
-  const request = await fetchRequest(requestId);
-
-  const hasGovViolation = request.flags.some((f) => f.type === "government_violation");
-  if (hasGovViolation) {
-    throw new Error("Cannot submit while a government requirement is violated.");
-  }
-
   const now = new Date().toISOString();
   const { data, error } = await supabase
     .from("requests")

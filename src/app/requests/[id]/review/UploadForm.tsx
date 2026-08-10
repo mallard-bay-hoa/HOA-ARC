@@ -28,23 +28,27 @@ export function UploadForm({ requestId, documents }: { requestId: string; docume
         </Button>
       </form>
       {documents.length > 0 && (
-        <ul className="mt-3 space-y-1 text-sm text-slate-600">
-          {documents.map((d) => (
-            <li key={d.id} className="flex items-center justify-between gap-3">
-              <span>
-                {d.name} ({Math.round(d.sizeBytes / 1024)} KB)
-              </span>
-              <span className="flex shrink-0 items-center gap-3">
-                <DocumentLinks requestId={requestId} documentId={d.id} />
-                <form action={removeDocumentAction.bind(null, requestId, d.id)}>
-                  <button type="submit" className="text-xs text-rose-700 hover:underline">
-                    Remove
-                  </button>
-                </form>
-              </span>
-            </li>
-          ))}
-        </ul>
+        <>
+          <hr className="mt-6 border-slate-100" />
+          <h3 className="mb-2 mt-4 text-xs font-medium uppercase tracking-wide text-slate-500">Uploaded Files</h3>
+          <ul className="space-y-1 text-sm text-slate-600">
+            {documents.map((d) => (
+              <li key={d.id} className="flex items-center justify-between gap-3">
+                <span>
+                  {d.name} ({Math.round(d.sizeBytes / 1024)} KB)
+                </span>
+                <span className="flex shrink-0 items-center gap-3">
+                  <DocumentLinks requestId={requestId} documentId={d.id} />
+                  <form action={removeDocumentAction.bind(null, requestId, d.id)}>
+                    <button type="submit" className="text-xs text-rose-700 hover:underline">
+                      Remove
+                    </button>
+                  </form>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "./ui";
 
 const ACCEPT =
@@ -10,16 +10,9 @@ function sameFile(a: File, b: File): boolean {
   return a.name === b.name && a.size === b.size && a.lastModified === b.lastModified;
 }
 
-export function FileUploadField({
-  name = "file",
-  files,
-  onFilesChange,
-}: {
-  name?: string;
-  files: File[];
-  onFilesChange: (files: File[]) => void;
-}) {
+export function FileUploadField({ name = "file" }: { name?: string }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [files, setFiles] = useState<File[]>([]);
 
   function syncNativeInput(next: File[]) {
     const dt = new DataTransfer();
@@ -34,13 +27,13 @@ export function FileUploadField({
       if (!merged.some((m) => sameFile(m, f))) merged.push(f);
     }
     syncNativeInput(merged);
-    onFilesChange(merged);
+    setFiles(merged);
   }
 
   function removeFile(index: number) {
     const next = files.filter((_, i) => i !== index);
     syncNativeInput(next);
-    onFilesChange(next);
+    setFiles(next);
   }
 
   return (

@@ -8,9 +8,9 @@ export default async function HomePage() {
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center gap-8 px-6 py-16 text-center">
       <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">Mallard Bay Homeowners Association</p>
-        <h1 className="mt-2 text-3xl font-semibold text-slate-900">Architectural Request Center</h1>
-        <p className="mx-auto mt-3 max-w-lg text-slate-600">
+        <p className="text-xs font-medium uppercase tracking-wide text-emerald-100">Mallard Bay Homeowners Association</p>
+        <h1 className="mt-2 text-3xl font-semibold text-white">Architectural Request Center</h1>
+        <p className="mx-auto mt-3 max-w-lg text-emerald-50">
           Submit a request for board approval before starting a fence, structure, landscaping, or home
           alteration project.
         </p>

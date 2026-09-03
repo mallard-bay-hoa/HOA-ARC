@@ -67,7 +67,7 @@ export default async function NewRequestPage({
 
   return (
     <>
-      <TopBar eyebrow="Mallard Bay ARC" title="What kind of request is this?" right={session.addresses.length > 1 ? <span className="text-sm text-slate-500">{address}</span> : undefined} />
+      <TopBar eyebrow="Mallard Bay ARC" title="What kind of request is this?" right={session.addresses.length > 1 ? <span className="text-sm text-emerald-100">{address}</span> : undefined} />
       <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
         <div className="grid gap-3 sm:grid-cols-2">
           {CATEGORIES.map((category) => (

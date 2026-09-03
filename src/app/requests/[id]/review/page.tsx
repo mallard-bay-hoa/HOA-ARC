@@ -22,7 +22,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
     <>
       <TopBar eyebrow="Mallard Bay ARC" title="Before you submit" />
       <main className="mx-auto w-full max-w-xl flex-1 px-6 py-10">
-        <Link href={`/requests/${request.id}/questions`} className="mb-4 inline-block text-sm text-emerald-800 hover:underline">
+        <Link href={`/requests/${request.id}/questions`} className="mb-4 inline-block text-sm text-emerald-100 hover:text-white hover:underline">
           &larr; Back to edit
         </Link>
         <Card>

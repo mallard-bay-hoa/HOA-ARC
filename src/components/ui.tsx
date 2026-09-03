@@ -39,8 +39,8 @@ export function Button({
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" | "danger" }) {
   const base = "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed";
   const variants = {
-    primary: "bg-emerald-700 text-white hover:bg-emerald-800",
-    ghost: "border border-slate-300 text-slate-700 hover:bg-slate-50",
+    primary: "border border-emerald-700 bg-white text-emerald-800 hover:bg-emerald-50",
+    ghost: "border border-emerald-200 text-emerald-800 hover:bg-emerald-50",
     danger: "border border-rose-300 text-rose-700 hover:bg-rose-50",
   };
   return <button className={clsx(base, variants[variant], className)} {...props} />;

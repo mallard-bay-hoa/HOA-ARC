@@ -31,11 +31,11 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
         right={<StatusPill status={request.status} />}
       />
       <main className="mx-auto w-full max-w-xl flex-1 px-6 py-10">
-        <Link href="/requests" className="mb-4 inline-block text-sm text-slate-500 hover:text-slate-700">
+        <Link href="/requests" className="mb-4 inline-block text-sm text-emerald-100 hover:text-white">
           &larr; Back to My Requests
         </Link>
         {request.slaDueAt && ["in_review", "info_requested"].includes(request.status) && (
-          <p className="mb-4 text-sm text-slate-500">
+          <p className="mb-4 text-sm text-emerald-100">
             Board response due by {new Date(request.slaDueAt).toLocaleDateString()}
           </p>
         )}

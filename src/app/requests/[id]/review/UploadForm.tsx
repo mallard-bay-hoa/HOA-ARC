@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState } from "react";
 import { Button } from "@/components/ui";
 import { FileUploadField } from "@/components/FileUploadField";
 import { DocumentLinks } from "@/components/DocumentLinks";
@@ -11,17 +11,15 @@ import type { Document } from "@/lib/domain/types";
 export function UploadForm({ requestId, documents }: { requestId: string; documents: Document[] }) {
   const boundUpload = uploadDocumentAction.bind(null, requestId);
   const [state, formAction, pending] = useActionState(boundUpload, undefined);
-  const [files, setFiles] = useState<File[]>([]);
-
-  useEffect(() => {
-    if (state?.success) setFiles([]);
-  }, [state]);
 
   return (
     <div className="mt-6 border-t border-slate-100 pt-6">
       <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Attach a file</p>
       <form action={formAction} className="flex flex-col gap-3">
-        <FileUploadField files={files} onFilesChange={setFiles} />
+        {/* Keyed on documents.length so a successful upload (which grows this
+            list via the action's revalidatePath) remounts the field and
+            clears its picked files — no effect needed to reset it. */}
+        <FileUploadField key={documents.length} />
         {state?.error && <p className="text-sm text-rose-700">{state.error}</p>}
         <Button type="submit" variant="ghost" disabled={pending} className="w-fit">
           {pending ? "Uploading…" : "Upload"}

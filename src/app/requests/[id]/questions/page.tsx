@@ -26,7 +26,7 @@ export default async function QuestionsPage({ params }: { params: Promise<{ id: 
     <>
       <TopBar eyebrow="Mallard Bay ARC" title={`New Request — ${category.name}`} />
       <main className="mx-auto w-full max-w-xl flex-1 px-6 py-10">
-        <Link href="/requests/new" className="mb-4 inline-block text-sm text-slate-500 hover:text-slate-700">
+        <Link href="/requests/new" className="mb-4 inline-block text-sm text-emerald-100 hover:text-white">
           &larr; Choose a different category
         </Link>
         <Card>

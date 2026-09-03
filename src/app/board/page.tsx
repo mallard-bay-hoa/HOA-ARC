@@ -14,7 +14,7 @@ export default async function BoardDashboardPage() {
 
   return (
     <>
-      <TopBar eyebrow="Mallard Bay ARC — Board" title="ARC Requests" right={<span className="text-sm text-slate-500">Signed in as {member.name}</span>} />
+      <TopBar eyebrow="Mallard Bay ARC — Board" title="ARC Requests" right={<span className="text-sm text-emerald-100">Signed in as {member.name}</span>} />
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-10">
         <Card>
           {requests.length === 0 && <p className="text-sm text-slate-500">No requests submitted yet.</p>}

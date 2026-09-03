@@ -15,19 +15,19 @@ export async function TopBar({
   const signedIn = Boolean(resident || board);
 
   return (
-    <header className="border-b border-slate-200 bg-white">
+    <header className="border-b border-white/15 bg-emerald-700">
       <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
         <div>
-          <Link href="/" className="text-xs font-medium uppercase tracking-wide text-emerald-700">
+          <Link href="/" className="text-xs font-medium uppercase tracking-wide text-emerald-100">
             {eyebrow}
           </Link>
-          <h1 className="text-lg font-semibold text-slate-900">{title}</h1>
+          <h1 className="text-lg font-semibold text-white">{title}</h1>
         </div>
         <div className="flex items-center gap-4">
           {right}
           {signedIn && (
             <form action={signOut}>
-              <button type="submit" className="text-sm text-slate-500 hover:text-slate-700 hover:underline">
+              <button type="submit" className="text-sm text-emerald-100 hover:text-white hover:underline">
                 Sign out
               </button>
             </form>

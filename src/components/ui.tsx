@@ -23,7 +23,7 @@ export function StatusPill({ status }: { status: RequestStatus }) {
 }
 
 export function DueChip({ label, urgency }: { label: string; urgency: "ok" | "warn" | "bad" | "none" }) {
-  if (urgency === "none") return <span className="text-xs text-slate-400">{label}</span>;
+  if (urgency === "none") return <span className="text-xs text-slate-600">{label}</span>;
   const className = {
     ok: "text-slate-500",
     warn: "text-amber-700",
@@ -41,8 +41,8 @@ export function Button({
   const variants = {
     primary: "border border-emerald-700 bg-white text-emerald-800 hover:bg-emerald-50",
     cta: "bg-emerald-950 text-white font-bold hover:bg-emerald-900",
-    ghost: "border border-emerald-200 text-emerald-800 hover:bg-emerald-50",
-    danger: "border border-rose-300 text-rose-700 hover:bg-rose-50",
+    ghost: "border border-emerald-400 text-emerald-800 hover:bg-emerald-50",
+    danger: "border border-rose-500 text-rose-700 hover:bg-rose-50",
   };
   return <button className={clsx(base, variants[variant], className)} {...props} />;
 }
@@ -73,7 +73,7 @@ export function FlagRow({ flag }: { flag: { type: string; citation: string; desc
       <span className={clsx("mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full", style.dot)} />
       <div>
         <div className="text-sm font-semibold text-slate-800">
-          {style.label} <span className="font-normal text-slate-400">— {flag.citation}</span>
+          {style.label} <span className="font-normal text-slate-600">— {flag.citation}</span>
         </div>
         <div className="text-sm text-slate-600">{flag.description}</div>
       </div>

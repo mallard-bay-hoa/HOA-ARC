@@ -24,7 +24,7 @@ export function CertifyForm({
   return (
     <form action={formAction} className="flex flex-col gap-6">
       <div>
-        <h3 className="mb-2 text-sm font-semibold text-slate-900">Government and HOA requirements</h3>
+        <h2 className="mb-2 text-sm font-semibold text-slate-900">Government and HOA requirements</h2>
         <ul className="flex flex-col gap-3">
           {requirements.map((r, i) => (
             <li key={i} className="border-t border-slate-100 pt-3 first:border-t-0 first:pt-0">
@@ -55,7 +55,7 @@ export function CertifyForm({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Please describe your project in as much detail as possible — dimensions, materials, location on the property, timeline, and anything else that will help the Board evaluate your request."
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          className="w-full rounded-md border border-slate-500 px-3 py-2 text-sm"
         />
       </Field>
 

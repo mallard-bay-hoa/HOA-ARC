@@ -82,9 +82,13 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
                 <li key={d.id} className="flex items-center justify-between gap-3">
                   <span>{d.name}</span>
                   <span className="flex shrink-0 items-center gap-3">
-                    <DocumentLinks requestId={request.id} documentId={d.id} />
+                    <DocumentLinks requestId={request.id} documentId={d.id} documentName={d.name} />
                     <form action={removeDocumentAction.bind(null, request.id, d.id)}>
-                      <button type="submit" className="text-xs text-rose-700 hover:underline">
+                      <button
+                        type="submit"
+                        aria-label={`Remove ${d.name}`}
+                        className="px-1 py-1 text-xs text-rose-700 hover:underline"
+                      >
                         Remove
                       </button>
                     </form>

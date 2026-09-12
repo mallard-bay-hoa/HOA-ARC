@@ -21,10 +21,10 @@ export default async function BoardDashboardPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
-                <th className="pb-2 font-medium">Address</th>
-                <th className="pb-2 font-medium">Category</th>
-                <th className="pb-2 font-medium">Status</th>
-                <th className="pb-2 font-medium">Due</th>
+                <th scope="col" className="pb-2 font-medium">Address</th>
+                <th scope="col" className="pb-2 font-medium">Category</th>
+                <th scope="col" className="pb-2 font-medium">Status</th>
+                <th scope="col" className="pb-2 font-medium">Due</th>
               </tr>
             </thead>
             <tbody>
@@ -35,7 +35,7 @@ export default async function BoardDashboardPage() {
                     <td className="py-3">
                       <Link
                         href={`/board/${r.id}`}
-                        className="font-medium text-emerald-800 after:absolute after:inset-0 hover:underline"
+                        className="font-medium text-emerald-800 underline after:absolute after:inset-0"
                       >
                         {r.address}
                       </Link>

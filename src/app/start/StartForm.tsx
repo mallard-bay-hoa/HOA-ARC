@@ -10,7 +10,7 @@ export function StartForm() {
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <Field label="Email address">
-        <input name="email" type="email" required className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+        <input name="email" type="email" required className="w-full rounded-md border border-slate-500 px-3 py-2 text-sm" />
       </Field>
       {state?.error && <p className="text-sm text-rose-700">{state.error}</p>}
       <Button type="submit" disabled={pending}>

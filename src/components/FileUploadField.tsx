@@ -54,7 +54,12 @@ export function FileUploadField({ name = "file" }: { name?: string }) {
           {files.map((f, i) => (
             <li key={`${f.name}-${f.size}-${f.lastModified}`} className="flex items-center gap-2 text-sm text-slate-700">
               <span>{f.name}</span>
-              <button type="button" onClick={() => removeFile(i)} className="text-xs text-rose-700 hover:underline">
+              <button
+                type="button"
+                onClick={() => removeFile(i)}
+                aria-label={`Remove ${f.name}`}
+                className="px-1 py-1 text-xs text-rose-700 hover:underline"
+              >
                 Remove
               </button>
             </li>

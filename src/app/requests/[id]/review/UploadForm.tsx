@@ -14,7 +14,7 @@ export function UploadForm({ requestId, documents }: { requestId: string; docume
 
   return (
     <div className="mt-6 border-t border-slate-100 pt-6">
-      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Attach a file</p>
+      <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Attach a file</h3>
       <form action={formAction} className="flex flex-col gap-3">
         {/* Keyed on documents.length so a successful upload (which grows this
             list via the action's revalidatePath) remounts the field and
@@ -36,9 +36,13 @@ export function UploadForm({ requestId, documents }: { requestId: string; docume
                   {d.name} ({Math.round(d.sizeBytes / 1024)} KB)
                 </span>
                 <span className="flex shrink-0 items-center gap-3">
-                  <DocumentLinks requestId={requestId} documentId={d.id} />
+                  <DocumentLinks requestId={requestId} documentId={d.id} documentName={d.name} />
                   <form action={removeDocumentAction.bind(null, requestId, d.id)}>
-                    <button type="submit" className="text-xs text-rose-700 hover:underline">
+                    <button
+                      type="submit"
+                      aria-label={`Remove ${d.name}`}
+                      className="px-1 py-1 text-xs text-rose-700 hover:underline"
+                    >
                       Remove
                     </button>
                   </form>

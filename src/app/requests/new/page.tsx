@@ -80,7 +80,7 @@ export default async function NewRequestPage({
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-semibold text-slate-800">{category.name}</div>
                   {!category.enabled && (
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-600">
                       Coming soon
                     </span>
                   )}

@@ -16,7 +16,7 @@ export function RespondForm({ requestId }: { requestId: string }) {
           name="body"
           rows={5}
           required
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          className="w-full rounded-md border border-slate-500 px-3 py-2 text-sm"
         />
       </Field>
       <FileUploadField />

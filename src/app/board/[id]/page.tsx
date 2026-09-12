@@ -7,6 +7,7 @@ import { messageTypeLabel, isResidentAuthor } from "@/lib/domain/message-display
 import { TopBar } from "@/components/TopBar";
 import { Card, StatusPill, FlagRow, Button } from "@/components/ui";
 import { DocumentLinks } from "@/components/DocumentLinks";
+import { AutoGrowTextarea } from "@/components/AutoGrowTextarea";
 import { BoardTabs } from "./BoardTabs";
 import { addCommentAction, requestInfoAction, castVoteAction } from "./actions";
 
@@ -38,13 +39,13 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
   const details = (
     <div className="space-y-4">
       <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Resident</p>
+        <h3 className="text-xs font-medium uppercase tracking-wide text-slate-500">Resident</h3>
         <p className="text-sm text-slate-800">
           {request.residentName} &middot; {request.residentEmail}
         </p>
       </div>
       <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Answers</p>
+        <h3 className="text-xs font-medium uppercase tracking-wide text-slate-500">Answers</h3>
         <dl className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
           {formatAnswerEntries(request.answers).map(({ id, label, value }) => (
             <div key={id} className="contents">
@@ -56,7 +57,7 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
       </div>
       {request.flags.length > 0 && (
         <div>
-          <p className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500">Flags from intake</p>
+          <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500">Flags from intake</h3>
           {request.flags.map((f, i) => (
             <FlagRow key={i} flag={f} />
           ))}
@@ -76,7 +77,7 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
               <span>
                 {d.name} ({Math.round(d.sizeBytes / 1024)} KB)
               </span>
-              <DocumentLinks requestId={request.id} documentId={d.id} />
+              <DocumentLinks requestId={request.id} documentId={d.id} documentName={d.name} />
             </li>
           ))}
         </ul>
@@ -86,7 +87,7 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
 
   const discussion = (
     <div>
-      <p className="mb-3 text-xs text-slate-400">Never visible to the resident.</p>
+      <p className="mb-3 text-xs text-slate-600">Never visible to the resident.</p>
       <div className="space-y-2">
         {comments.map((c) => (
           <div key={c.id} className="rounded-md bg-slate-100 px-3 py-2 text-sm">
@@ -95,8 +96,16 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
           </div>
         ))}
       </div>
-      <form action={boundComment} className="mt-3 flex gap-2">
-        <input name="body" placeholder="Add a comment for the Board only…" className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm" />
+      <form action={boundComment} className="mt-3 flex items-end gap-2">
+        <label htmlFor="board-comment-body" className="sr-only">
+          Add a comment for the Board only
+        </label>
+        <AutoGrowTextarea
+          id="board-comment-body"
+          name="body"
+          placeholder="Add a comment for the Board only…"
+          className="flex-1 rounded-md border border-slate-500 px-3 py-2 text-sm"
+        />
         <Button type="submit" variant="ghost">
           Post
         </Button>
@@ -107,7 +116,7 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
   const communication = (
     <div className="space-y-6">
       <div>
-        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Messages to the resident</p>
+        <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Messages to the resident</h3>
         <div className="space-y-2">
           {messages.map((m) => {
             const isFromResident = isResidentAuthor(m.authorId, boardMemberIds);
@@ -130,8 +139,16 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
           })}
         </div>
         {!decided && (
-          <form action={boundInfoRequest} className="mt-3 flex gap-2">
-            <input name="body" placeholder="Request more info from the resident…" className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <form action={boundInfoRequest} className="mt-3 flex items-end gap-2">
+            <label htmlFor="info-request-body" className="sr-only">
+              Request more info from the resident
+            </label>
+            <AutoGrowTextarea
+              id="info-request-body"
+              name="body"
+              placeholder="Request more info from the resident…"
+              className="flex-1 rounded-md border border-slate-500 px-3 py-2 text-sm"
+            />
             <Button type="submit" variant="ghost">
               Send
             </Button>
@@ -140,7 +157,7 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
       </div>
 
       <div className="border-t border-slate-100 pt-4">
-        <p className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500">Vote &amp; Decide</p>
+        <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500">Vote &amp; Decide</h3>
         <p className="mb-3 text-xs text-slate-500">
           2 matching votes required, either way &middot; {approveCount} approve / {denyCount} deny so far
         </p>
@@ -162,25 +179,37 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
             )}
             <div className="flex flex-col gap-3 sm:flex-row">
             <form action={boundApprove} className="flex-1 space-y-2">
+              <label htmlFor="approve-cited-sections" className="sr-only">
+                Conditions for approval, optional
+              </label>
               <input
+                id="approve-cited-sections"
                 name="citedSections"
                 placeholder="Optional: conditions, comma-separated"
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-xs"
+                className="w-full rounded-md border border-slate-500 px-3 py-2 text-xs"
               />
               <Button type="submit" className="w-full">
                 Approve
               </Button>
             </form>
             <form action={boundDeny} className="flex-1 space-y-2">
+              <label htmlFor="deny-cited-sections" className="sr-only">
+                Cited section(s), required to deny
+              </label>
               <input
+                id="deny-cited-sections"
                 name="citedSections"
                 placeholder="Cite section(s), e.g. HOA Rule 4, comma-separated"
-                className="w-full rounded-md border border-slate-300 px-3 py-2 text-xs"
+                aria-describedby="deny-cited-sections-helper"
+                required
+                className="w-full rounded-md border border-slate-500 px-3 py-2 text-xs"
               />
               <Button type="submit" variant="danger" className="w-full">
                 Deny
               </Button>
-              <p className="text-xs text-slate-500">Required to deny — cites the specific rule the plan doesn&rsquo;t conform to (Utah HB 217).</p>
+              <p id="deny-cited-sections-helper" className="text-xs text-slate-500">
+                Required to deny — cites the specific rule the plan doesn&rsquo;t conform to (Utah HB 217).
+              </p>
             </form>
             </div>
           </div>

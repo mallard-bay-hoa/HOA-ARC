@@ -68,7 +68,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
             <div className="mt-4 rounded-md bg-amber-50 p-3">
               <p className="text-sm text-amber-900">The Board has requested more information.</p>
               <Link href={`/requests/${request.id}/respond`} className="mt-2 inline-block">
-                <Button>Respond</Button>
+                <Button variant="cta">Respond</Button>
               </Link>
             </div>
           )}
@@ -99,9 +99,15 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
           </Card>
         )}
 
-        <Link href="/requests" className="mt-6 inline-block">
-          <Button variant="cta">Done</Button>
-        </Link>
+        {request.status === "info_requested" ? (
+          <Link href="/requests" className="mt-6 inline-block text-sm text-emerald-100 hover:text-white">
+            Done for now
+          </Link>
+        ) : (
+          <Link href="/requests" className="mt-6 inline-block">
+            <Button variant="cta">Done</Button>
+          </Link>
+        )}
       </main>
     </>
   );

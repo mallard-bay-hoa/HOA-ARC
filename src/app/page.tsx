@@ -21,7 +21,7 @@ export default async function HomePage() {
           <div className="text-sm font-semibold text-slate-800">Residents</div>
           <p className="text-sm text-slate-600">Start or check on an architectural request.</p>
           <Link href={residentSession ? "/requests" : "/start"} className="w-full">
-            <Button className="w-full">My Requests</Button>
+            <Button variant="cta" className="w-full">My Requests</Button>
           </Link>
         </Card>
         <Card className="flex flex-col items-start gap-3">

@@ -189,7 +189,7 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
                 placeholder="Optional: conditions, comma-separated"
                 className="w-full rounded-md border border-slate-500 px-3 py-2 text-xs"
               />
-              <Button type="submit" className="w-full">
+              <Button type="submit" variant="cta" className="w-full">
                 Approve
               </Button>
             </form>

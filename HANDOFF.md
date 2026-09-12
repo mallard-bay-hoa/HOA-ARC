@@ -15,11 +15,13 @@ require untangling anything from a departing board member's personal life.
 
 | Thing | Value |
 |---|---|
-| Live app | https://hoa-arc-rust.vercel.app |
+| Live app | https://mallardbayhoa.org (custom domain; also reachable at https://hoa-arc-rust.vercel.app) |
+| Domain registrar | Porkbun, account `mallardbayhoaboard@gmail.com` (shared identity, see §3a) |
 | GitHub repo | https://github.com/mallard-bay-hoa/HOA-ARC (public) |
 | Vercel project | `hoa-arc`, currently under a personal Hobby account (see below) |
 | Supabase project | `hoa-arc`, ref `zkhapqcivafvkbmhzauq`, region `us-east-1` |
 | Supabase dashboard | https://supabase.com/dashboard/project/zkhapqcivafvkbmhzauq |
+| Resend account | **Currently under the current maintainer's personal account** (see §3b) — needs manual hand-off, same caveat as Vercel |
 
 ## 1. GitHub
 
@@ -106,7 +108,74 @@ require untangling anything from a departing board member's personal life.
      - Trigger a redeploy after any env var change — it doesn't happen
        automatically.
 
-## 4. Local development
+## 4. Domain (mallardbayhoa.org)
+
+- **Registrar**: Porkbun, account `mallardbayhoaboard@gmail.com` (shared
+  board identity — ask the current maintainer for the login, same as
+  Supabase in §2).
+- **DNS records currently set at Porkbun**:
+  - `ALIAS @ → cname.vercel-dns.com` — points the bare domain at Vercel.
+    We initially tried a plain `A` record (`76.76.21.21`, Vercel's
+    documented value), but Porkbun's ALIAS/ANAME flattening was found to
+    inject one of its own IPs alongside Vercel's, which broke TLS for
+    roughly half of requests. Switched to explicit `A` records instead
+    (see below) — **if `mallardbayhoa.org` ever stops resolving, check
+    `dig mallardbayhoa.org A` from a couple of different resolvers
+    (`@8.8.8.8`, `@1.1.1.1`) for a stray non-Vercel IP mixed in; that's
+    this exact issue recurring.**
+  - Two `A` records on `@`: `216.198.79.1` and `64.29.17.1` (Vercel's
+    currently-recommended IPs — check `vercel domains verify
+    mallardbayhoa.org` for the current recommendation, since Vercel can
+    change these).
+  - A pre-existing wildcard `CNAME * → pixie.porkbun.com` (Porkbun's
+    default parking page for undefined subdomains) — left in place,
+    harmless. It does **not** affect the bare root domain or any
+    explicitly-defined subdomain (explicit records always win over a
+    wildcard). If `www.mallardbayhoa.org` should ever work, it'll need
+    its own explicit `CNAME www → cname.vercel-dns.com`, since right now
+    it falls through to this wildcard (Porkbun's parking page).
+  - Resend domain verification records (MX + TXT/SPF on `send.mallardbayhoa.org`,
+    DKIM TXT on `resend._domainkey.mallardbayhoa.org`, DMARC TXT on
+    `_dmarc.mallardbayhoa.org`) — see §5.
+- **Vercel side**: the domain is attached to the `hoa-arc` project
+  (`vercel domains inspect mallardbayhoa.org` to check status). If it ever
+  shows `misconfigured`, re-run `vercel domains verify mallardbayhoa.org`
+  for the current expected records.
+
+## 5. Resend (transactional email)
+
+- **Currently under the current maintainer's personal Resend account —
+  this needs the same manual hand-off treatment as Vercel (§3).** At
+  hand-off time, either transfer/share the Resend account itself, or
+  create a new one under a shared identity (e.g.
+  `mallardbayhoaboard@gmail.com`, matching Supabase/Porkbun) and redo the
+  domain verification below under that account instead.
+- **Sending domain**: `mallardbayhoa.org`, verified in Resend (Domains →
+  mallardbayhoa.org should show a green "Verified" status). If it's ever
+  unverified again, redo the DNS records Resend's dashboard shows you at
+  Porkbun (see §4's Resend bullet for which records those are).
+- **From address**: `arc@mallardbayhoa.org` (hardcoded in
+  `src/lib/email.ts`). **Reply-To**: `mallardbayhoaboard@gmail.com` — so
+  replies from residents land in the board's real inbox rather than an
+  unmonitored address.
+- **API key**: `RESEND_API_KEY` in Vercel → Settings → Environment
+  Variables, currently set for **Production only** (not Preview) —
+  intentional, so preview deployments still use the console-log stub
+  instead of sending real email to residents during testing. If that
+  changes, add the same key to Preview too.
+- **Important safety mechanism**: `src/lib/email.ts` exports
+  `emailIsStubbed` (true whenever `RESEND_API_KEY` isn't set). Both
+  `src/app/start/actions.ts` and `src/app/board/signin/actions.ts` check
+  this before deciding whether to put the magic-link token in the
+  `/start/link-sent` URL and show the dev-only "simulate clicking the
+  emailed link" bypass button. **Do not remove that check** — without it,
+  the token (and a working sign-in bypass) would be exposed in the URL/
+  browser history to anyone who saw that page, once email is genuinely
+  live. This bit us once already: the bypass was originally unconditional
+  from early development and only gated behind `emailIsStubbed` after
+  Resend went live.
+
+## 6. Local development
 
 ```bash
 git clone https://github.com/mallard-bay-hoa/HOA-ARC.git
@@ -136,7 +205,7 @@ forces IPv4-first DNS resolution
 (`NODE_OPTIONS=--dns-result-order=ipv4first`). If you ever see this error
 again, confirm that's still in place.
 
-## 5. Outstanding items (not yet done)
+## 7. Outstanding items (not yet done)
 
 - **Delete the old Supabase project** (id `eufifaswhjhsxhvlqvky`, under the
   previous maintainer's *personal* account) once confirmed it's no longer
@@ -146,10 +215,18 @@ again, confirm that's still in place.
   still uses a hand-rolled magic-link/cookie session (see README.md's "What's
   stubbed"), not Supabase's own Auth product, and RLS policies were never
   authored (tables are locked down by omission, not by real policies).
-- **Google Drive integration** and **Resend** (transactional email) — not
-  yet provisioned. When they are, set them up under the shared
-  `mallardbayhoaboard@gmail.com`-style identity from day one, not anyone's
-  personal account, so this whole migration doesn't have to happen a third
-  time.
-- Remaining category question trees / the daily notification-and-timer cron
-  job — see `DESIGN.md`'s Suggested Build Order for what's left.
+- **Move the Resend account off the current maintainer's personal
+  account** to a shared identity (see §5) — it was set up under a personal
+  account rather than `mallardbayhoaboard@gmail.com`-style shared identity
+  like Supabase/Porkbun were, so it needs the same manual hand-off Vercel
+  does (§3).
+- **Admin UI for editing question trees** (DESIGN.md §4) — adding/tweaking
+  a category's questions currently means editing its file directly under
+  `src/lib/domain/`.
+
+Google Drive was never provisioned and won't be — DESIGN.md originally
+specified it for document storage, but that was superseded by Supabase
+Storage instead (see README.md's Database section), since the project
+already runs on Supabase. All 5 category question trees and the daily
+notification/timer cron job (also originally listed here as outstanding)
+are done — see README.md's "What's real" for both.

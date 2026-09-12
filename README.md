@@ -55,8 +55,16 @@ deliberately faked rather than left half-built:
 
 | Piece | File | Stub behavior | Real version |
 |---|---|---|---|
-| Auth | `src/lib/session.ts`, `src/lib/data/auth.ts` | Real Supabase Postgres-backed magic-link tokens (`src/lib/data/auth.ts`), but sessions are still unsigned cookies; a "simulate clicking the emailed link" button stands in for a real email | Supabase Auth magic-link sign-in + signed sessions (DESIGN.md §3) |
-| Email | `src/lib/email.ts` | Logs to the server console | Resend (DESIGN.md §7) |
+| Auth | `src/lib/session.ts`, `src/lib/data/auth.ts` | Real Supabase Postgres-backed magic-link tokens (`src/lib/data/auth.ts`), but sessions are still unsigned cookies | Supabase Auth magic-link sign-in + signed sessions (DESIGN.md §3) |
+
+Email is real now too — sent via Resend on the verified `mallardbayhoa.org`
+domain (see [HANDOFF.md](./HANDOFF.md) §5). It only falls back to a
+console-log stub when `RESEND_API_KEY` isn't set (local dev, and Preview
+deployments on Vercel, intentionally — see HANDOFF.md). `src/lib/email.ts`
+exports `emailIsStubbed` so pages can tell which mode they're in; the
+"simulate clicking the emailed link" bypass button only ever renders when
+`emailIsStubbed` is true — don't remove that check, it's what stops the
+magic-link token from leaking into the URL once email is genuinely live.
 
 All 5 categories are enabled. An admin UI for editing question trees is
 still the one deferred piece from DESIGN.md §4 — for now, adding or tweaking
@@ -70,8 +78,7 @@ a question means editing its category file directly.
 (`supabase/migrations/0001_initial_schema.sql`). File uploads are real too —
 persisted in a private Supabase Storage bucket via `src/lib/storage.ts`
 (`supabase/migrations/0002_properties_residents.sql` covers the
-properties/residents roster). Email is still stubbed — fill in the rest of
-`.env.example` as that integration comes online.
+properties/residents roster).
 
 ## A known rough edge
 

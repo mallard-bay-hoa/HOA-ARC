@@ -2,8 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { getResidentSession } from "@/lib/session";
-import { getRequestById, addDocument, addOfficialMessageRaw, resubmitAfterInfoRequest } from "@/lib/data/requests";
+import { getRequestById, addDocument, addOfficialMessageRaw, resubmitAfterInfoRequest, boardMembers } from "@/lib/data/requests";
 import { uploadDocumentFile, hasAllowedDocumentExtension } from "@/lib/storage";
+import { getCategory } from "@/lib/domain/categories";
+import { sendEmail } from "@/lib/email";
 
 export async function respondToInfoRequest(
   requestId: string,
@@ -41,6 +43,18 @@ export async function respondToInfoRequest(
 
   await addOfficialMessageRaw(requestId, session.email, "general", body);
   await resubmitAfterInfoRequest(requestId);
+
+  const category = getCategory(request.categorySlug)?.name ?? request.categorySlug;
+  const members = await boardMembers();
+  await Promise.all(
+    members.map((m) =>
+      sendEmail(
+        m.email,
+        `${request.address} responded to your info request`,
+        `${request.address} replied on their ${category} request:\n\n${body}`
+      )
+    )
+  );
 
   redirect(`/requests/${requestId}`);
 }

@@ -3,8 +3,10 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getResidentSession } from "@/lib/session";
-import { getRequestById, submitRequest, addDocument } from "@/lib/data/requests";
+import { getRequestById, submitRequest, addDocument, boardMembers } from "@/lib/data/requests";
 import { uploadDocumentFile, hasAllowedDocumentExtension } from "@/lib/storage";
+import { getCategory } from "@/lib/domain/categories";
+import { sendEmail } from "@/lib/email";
 
 export async function submitAction(requestId: string) {
   const session = await getResidentSession();
@@ -13,7 +15,16 @@ export async function submitAction(requestId: string) {
   const request = await getRequestById(requestId);
   if (!request || !session.addresses.includes(request.address)) throw new Error("Not found");
 
-  await submitRequest(requestId);
+  const submitted = await submitRequest(requestId);
+
+  const category = getCategory(submitted.categorySlug)?.name ?? submitted.categorySlug;
+  const members = await boardMembers();
+  await Promise.all(
+    members.map((m) =>
+      sendEmail(m.email, `New ${category} request from ${submitted.address}`, `${submitted.address} submitted a ${category} request for the Board to review.`)
+    )
+  );
+
   redirect(`/requests/${requestId}`);
 }
 

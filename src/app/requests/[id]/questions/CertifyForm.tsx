@@ -61,7 +61,7 @@ export function CertifyForm({
 
       {state?.error && <p className="text-sm text-rose-700">{state.error}</p>}
 
-      <Button type="submit" disabled={pending || !canContinue} className="w-full sm:w-auto">
+      <Button type="submit" variant="cta" disabled={pending || !canContinue} className="w-full sm:w-auto">
         {pending ? "Saving…" : "Continue"}
       </Button>
     </form>

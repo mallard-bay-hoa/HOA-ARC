@@ -37,7 +37,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
           <UploadForm requestId={request.id} documents={request.documents} />
 
           <form action={boundSubmit} className="mt-6">
-            <Button type="submit" className="w-full sm:w-auto">
+            <Button type="submit" variant="cta" className="w-full sm:w-auto">
               Submit Request
             </Button>
           </form>

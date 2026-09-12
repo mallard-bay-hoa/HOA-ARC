@@ -28,7 +28,7 @@ export function ResidentDetailsForm({ knownAddresses }: { knownAddresses: string
         </datalist>
       </Field>
       {state?.error && <p className="text-sm text-rose-700">{state.error}</p>}
-      <Button type="submit" disabled={pending}>
+      <Button type="submit" variant="cta" disabled={pending}>
         {pending ? "Saving…" : "Continue"}
       </Button>
     </form>

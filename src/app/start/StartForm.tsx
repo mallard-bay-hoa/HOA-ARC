@@ -13,7 +13,7 @@ export function StartForm() {
         <input name="email" type="email" required className="w-full rounded-md border border-slate-500 px-3 py-2 text-sm" />
       </Field>
       {state?.error && <p className="text-sm text-rose-700">{state.error}</p>}
-      <Button type="submit" disabled={pending}>
+      <Button type="submit" variant="cta" disabled={pending}>
         {pending ? "Sending…" : "Send me a link"}
       </Button>
     </form>

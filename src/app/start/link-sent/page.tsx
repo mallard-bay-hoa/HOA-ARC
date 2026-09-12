@@ -29,7 +29,7 @@ export default async function LinkSentPage({
                 simulate clicking the link that was &ldquo;emailed&rdquo; to you.
               </p>
               <Link href={`/auth/link/${token}`} className="mt-3 inline-block">
-                <Button>Simulate clicking the emailed link</Button>
+                <Button variant="cta">Simulate clicking the emailed link</Button>
               </Link>
             </div>
           )}

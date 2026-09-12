@@ -42,7 +42,7 @@ export default async function MyRequestsPage() {
             ))}
           </div>
           <Link href="/requests/new" className="mt-6 block">
-            <Button className="w-full sm:w-auto">+ New Request</Button>
+            <Button variant="cta" className="w-full sm:w-auto">+ New Request</Button>
           </Link>
         </Card>
       </main>

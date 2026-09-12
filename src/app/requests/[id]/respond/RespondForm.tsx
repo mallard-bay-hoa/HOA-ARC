@@ -21,7 +21,7 @@ export function RespondForm({ requestId }: { requestId: string }) {
       </Field>
       <FileUploadField />
       {state?.error && <p className="text-sm text-rose-700">{state.error}</p>}
-      <Button type="submit" disabled={pending}>
+      <Button type="submit" variant="cta" disabled={pending}>
         {pending ? "Sending…" : "Send Response"}
       </Button>
     </form>

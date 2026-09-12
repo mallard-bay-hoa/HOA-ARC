@@ -3,16 +3,20 @@
 import { useRef, useState } from "react";
 import { clsx } from "clsx";
 
+export type BoardTabKey = "details" | "documents" | "discussion" | "communication";
+
 export function BoardTabs({
   details,
   documents,
   discussion,
   communication,
+  initialTab = "discussion",
 }: {
   details: React.ReactNode;
   documents: React.ReactNode;
   discussion: React.ReactNode;
   communication: React.ReactNode;
+  initialTab?: BoardTabKey;
 }) {
   const tabs = [
     { key: "details", label: "Details", content: details },
@@ -20,7 +24,7 @@ export function BoardTabs({
     { key: "discussion", label: "Discussion", content: discussion },
     { key: "communication", label: "Communication & Vote", content: communication },
   ] as const;
-  const [active, setActive] = useState<(typeof tabs)[number]["key"]>("discussion");
+  const [active, setActive] = useState<(typeof tabs)[number]["key"]>(initialTab);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   function focusTab(index: number) {

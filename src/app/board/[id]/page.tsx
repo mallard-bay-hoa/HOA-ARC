@@ -9,11 +9,21 @@ import { TopBar } from "@/components/TopBar";
 import { Card, StatusPill, FlagRow, Button } from "@/components/ui";
 import { DocumentLinks } from "@/components/DocumentLinks";
 import { AutoGrowTextarea } from "@/components/AutoGrowTextarea";
-import { BoardTabs } from "./BoardTabs";
+import { BoardTabs, type BoardTabKey } from "./BoardTabs";
 import { addCommentAction, requestInfoAction, castVoteAction } from "./actions";
 
-export default async function BoardRequestDetailPage({ params }: { params: Promise<{ id: string }> }) {
+const VALID_TABS: readonly BoardTabKey[] = ["details", "documents", "discussion", "communication"];
+
+export default async function BoardRequestDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ tab?: string }>;
+}) {
   const { id } = await params;
+  const { tab } = await searchParams;
+  const initialTab = VALID_TABS.find((t) => t === tab);
   const member = await getBoardSession();
   if (!member) redirect("/board/signin");
 
@@ -233,7 +243,13 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
           &larr; Back to All Requests
         </Link>
         <Card>
-          <BoardTabs details={details} documents={documents} discussion={discussion} communication={communication} />
+          <BoardTabs
+            details={details}
+            documents={documents}
+            discussion={discussion}
+            communication={communication}
+            initialTab={initialTab}
+          />
         </Card>
       </main>
     </>

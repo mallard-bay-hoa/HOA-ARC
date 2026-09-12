@@ -51,7 +51,7 @@ export async function respondToInfoRequest(
   const siteUrl = await getSiteUrl();
   await Promise.all(
     members.map(async (m) => {
-      const link = await signInLink(siteUrl, m.email, "board", `/board/${requestId}`);
+      const link = await signInLink(siteUrl, m.email, "board", `/board/${requestId}?tab=communication`);
       await sendEmail(
         m.email,
         `${request.address} responded to your info request`,

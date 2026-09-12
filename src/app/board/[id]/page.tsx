@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getBoardSession } from "@/lib/session";
 import { getRequestById, getBoardComments, getOfficialMessages, getVotes, boardMembers } from "@/lib/data/requests";
@@ -226,6 +227,9 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
         right={<StatusPill status={request.status} />}
       />
       <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-10">
+        <Link href="/board" className="mb-4 inline-block text-sm text-emerald-100 hover:text-white">
+          &larr; Back to All Requests
+        </Link>
         <Card>
           <BoardTabs details={details} documents={documents} discussion={discussion} communication={communication} />
         </Card>

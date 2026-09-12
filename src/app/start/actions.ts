@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { issueMagicLink } from "@/lib/data/auth";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, emailIsStubbed } from "@/lib/email";
 import { getSiteUrl } from "@/lib/site-url";
 
 const schema = z.object({
@@ -30,5 +30,9 @@ export async function sendMagicLink(_prevState: { error?: string } | undefined, 
     `Use this link to access your architectural requests:\n${siteUrl}/auth/link/${token}\n\nThe Board`
   );
 
-  redirect(`/start/link-sent?token=${token}`);
+  // The token only belongs in the URL when email is stubbed (so the dev
+  // "simulate clicking" bypass has something to link to) — once real email
+  // sends, leaking the token into the URL/history would let anyone who
+  // sees this page skip verifying the address entirely.
+  redirect(emailIsStubbed ? `/start/link-sent?token=${token}` : "/start/link-sent");
 }

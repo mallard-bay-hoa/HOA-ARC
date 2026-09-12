@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Card, Button } from "@/components/ui";
 import { TopBar } from "@/components/TopBar";
+import { emailIsStubbed } from "@/lib/email";
 
 export default async function LinkSentPage({
   searchParams,
@@ -20,7 +21,7 @@ export default async function LinkSentPage({
             time.
           </p>
 
-          {token && (
+          {token && emailIsStubbed && (
             <div className="mt-6 rounded-md border border-dashed border-amber-300 bg-amber-50 p-4">
               <p className="text-xs font-medium uppercase tracking-wide text-amber-800">Dev mode</p>
               <p className="mt-1 text-sm text-amber-900">

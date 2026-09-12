@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { issueMagicLink } from "@/lib/data/auth";
 import { getBoardMemberById } from "@/lib/data/residents";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, emailIsStubbed } from "@/lib/email";
 import { getSiteUrl } from "@/lib/site-url";
 
 export async function requestBoardMagicLink(memberId: string) {
@@ -19,5 +19,5 @@ export async function requestBoardMagicLink(memberId: string) {
     `Use this link to sign in to the Board dashboard:\n${siteUrl}/auth/link/${token}\n\nMallard Bay ARC`
   );
 
-  redirect(`/start/link-sent?token=${token}`);
+  redirect(emailIsStubbed ? `/start/link-sent?token=${token}` : "/start/link-sent");
 }

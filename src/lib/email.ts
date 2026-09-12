@@ -8,6 +8,12 @@ import { Resend } from "resend";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
+// Lets pages decide whether it's safe to show a dev-only auth bypass (the
+// "simulate clicking the emailed link" button) — that must never render
+// once real email is actually sending, or it defeats email verification
+// entirely for anyone who sees the link-sent URL.
+export const emailIsStubbed = !resend;
+
 // mallardbayhoa.org is verified in Resend for sending, but replies should
 // land in the board's actual inbox rather than an unmonitored address.
 const REPLY_TO = "mallardbayhoaboard@gmail.com";

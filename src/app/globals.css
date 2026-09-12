@@ -4,3 +4,15 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
+
+/* Form fields always sit inside white Cards, never directly on the green
+   page background, but they otherwise inherit `body`'s text color (white)
+   since none of them set their own. Force a dark, legible color here
+   instead of relying on every input/textarea/select to opt in individually
+   — that's exactly what let invisible white-on-white text ship once
+   already (Landscape's "Describe your project" field). */
+input,
+textarea,
+select {
+  color: var(--color-slate-900, #0f172a);
+}

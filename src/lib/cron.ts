@@ -3,6 +3,7 @@ import { supabase } from "./data/supabase";
 import { listAllRequests, getOfficialMessages, addOfficialMessageRaw, boardMembers } from "./data/requests";
 import { getCategory } from "./domain/categories";
 import { sendEmail } from "./email";
+import { signInLink } from "./data/auth";
 
 // DESIGN.md §6 — the daily timer sweep. A single Vercel Cron job hits the route that
 // calls this, which also doubles as the Supabase keep-alive ping (§1a): the free tier
@@ -30,7 +31,7 @@ export interface TimerSweepResult {
   expired: number;
 }
 
-export async function runDailyTimerSweep(): Promise<TimerSweepResult> {
+export async function runDailyTimerSweep(siteUrl: string): Promise<TimerSweepResult> {
   const requests = await listAllRequests();
   const members = await boardMembers();
   const boardEmails = members.map((m) => m.email);
@@ -47,7 +48,12 @@ export async function runDailyTimerSweep(): Promise<TimerSweepResult> {
       (r) => `- ${r.address} (${categoryName(r.categorySlug)}) — due ${new Date(r.slaDueAt!).toLocaleDateString()}`
     );
     const body = `The following requests are past the Board's 14-day response target:\n\n${lines.join("\n")}`;
-    await Promise.all(boardEmails.map((email) => sendEmail(email, `${overdueSla.length} ARC request(s) past the 14-day SLA`, body)));
+    await Promise.all(
+      boardEmails.map(async (email) => {
+        const link = await signInLink(siteUrl, email, "board");
+        await sendEmail(email, `${overdueSla.length} ARC request(s) past the 14-day SLA`, `${body}\n\nOpen the dashboard: ${link}`);
+      })
+    );
     result.slaReminders = overdueSla.length;
   }
 
@@ -60,7 +66,12 @@ export async function runDailyTimerSweep(): Promise<TimerSweepResult> {
     if (hasGovViolation) {
       // Requirements §7 — a government-code violation blocks auto-approval; escalate instead.
       const body = `${r.address} (${categoryName(r.categorySlug)}) has passed its 28-day failsafe deadline but cannot be auto-approved because it has an unresolved government-code flag. It needs the Board's immediate attention.`;
-      await Promise.all(boardEmails.map((email) => sendEmail(email, `URGENT: ${r.address} needs an immediate decision`, body)));
+      await Promise.all(
+        boardEmails.map(async (email) => {
+          const link = await signInLink(siteUrl, email, "board", `/board/${r.id}`);
+          await sendEmail(email, `URGENT: ${r.address} needs an immediate decision`, `${body}\n\nDecide now: ${link}`);
+        })
+      );
       result.failsafeEscalated++;
     } else {
       const decidedAt = new Date().toISOString();
@@ -69,15 +80,21 @@ export async function runDailyTimerSweep(): Promise<TimerSweepResult> {
         .update({ status: "auto_approved", decided_at: decidedAt, approval_expires_at: addDays(decidedAt, APPROVAL_EXPIRY_DAYS), updated_at: decidedAt })
         .eq("id", r.id);
       await addOfficialMessageRaw(r.id, "system", "auto_approved", "Approved automatically because the Board did not respond within the required timeframe.");
+      const residentLink = await signInLink(siteUrl, r.residentEmail, "resident", `/requests/${r.id}`);
       await sendEmail(
         r.residentEmail,
         `Your ${categoryName(r.categorySlug)} request was automatically approved`,
-        `The Board did not respond within 28 days, so your request has been automatically approved per HOA policy.`
+        `The Board did not respond within 28 days, so your request has been automatically approved per HOA policy.\n\nView it here: ${residentLink}`
       );
       await Promise.all(
-        boardEmails.map((email) =>
-          sendEmail(email, `${r.address} auto-approved (28-day failsafe)`, `This request passed the 28-day failsafe deadline without a board decision and was auto-approved.`)
-        )
+        boardEmails.map(async (email) => {
+          const link = await signInLink(siteUrl, email, "board", `/board/${r.id}`);
+          await sendEmail(
+            email,
+            `${r.address} auto-approved (28-day failsafe)`,
+            `This request passed the 28-day failsafe deadline without a board decision and was auto-approved.\n\n${link}`
+          );
+        })
       );
       result.failsafeAutoApproved++;
     }
@@ -91,10 +108,11 @@ export async function runDailyTimerSweep(): Promise<TimerSweepResult> {
     if (expiresAt < now) {
       await supabase.from("requests").update({ status: "expired", updated_at: new Date().toISOString() }).eq("id", r.id);
       await addOfficialMessageRaw(r.id, "system", "expired", "Your approval has expired because work had not started within 90 days, per Rule 9.5. Please contact the Board to re-apply.");
+      const link = await signInLink(siteUrl, r.residentEmail, "resident", `/requests/${r.id}`);
       await sendEmail(
         r.residentEmail,
         `Your ${categoryName(r.categorySlug)} approval has expired`,
-        `Your approval expired because work hadn't started within 90 days (Rule 9.5). Please contact the Board if you'd still like to proceed — you may need to re-apply.`
+        `Your approval expired because work hadn't started within 90 days (Rule 9.5). Please contact the Board if you'd still like to proceed — you may need to re-apply.\n\n${link}`
       );
       result.expired++;
     } else if (now >= expiresAt - APPROVAL_WARNING_DAYS_BEFORE * 24 * 60 * 60 * 1000) {
@@ -103,10 +121,11 @@ export async function runDailyTimerSweep(): Promise<TimerSweepResult> {
       if (!alreadyWarned) {
         const dueDate = new Date(r.approvalExpiresAt!).toLocaleDateString();
         await addOfficialMessageRaw(r.id, "system", "expiry_warning", `Your approval will expire on ${dueDate} if work hasn't started (Rule 9.5).`);
+        const link = await signInLink(siteUrl, r.residentEmail, "resident", `/requests/${r.id}`);
         await sendEmail(
           r.residentEmail,
           `Reminder: your ${categoryName(r.categorySlug)} approval expires soon`,
-          `Your approval will expire on ${dueDate} unless work has started, per Rule 9.5.`
+          `Your approval will expire on ${dueDate} unless work has started, per Rule 9.5.\n\n${link}`
         );
         result.expiryWarnings++;
       }

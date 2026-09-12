@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runDailyTimerSweep } from "@/lib/cron";
+import { getSiteUrl } from "@/lib/site-url";
 
 // Triggered daily by Vercel Cron (see vercel.json). Vercel signs cron requests with
 // this header automatically, so a hit without the matching secret is rejected —
@@ -10,6 +11,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const result = await runDailyTimerSweep();
+  const siteUrl = await getSiteUrl();
+  const result = await runDailyTimerSweep(siteUrl);
   return NextResponse.json(result);
 }

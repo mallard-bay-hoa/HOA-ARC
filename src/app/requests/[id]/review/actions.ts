@@ -7,6 +7,8 @@ import { getRequestById, submitRequest, addDocument, boardMembers } from "@/lib/
 import { uploadDocumentFile, hasAllowedDocumentExtension } from "@/lib/storage";
 import { getCategory } from "@/lib/domain/categories";
 import { sendEmail } from "@/lib/email";
+import { signInLink } from "@/lib/data/auth";
+import { getSiteUrl } from "@/lib/site-url";
 
 export async function submitAction(requestId: string) {
   const session = await getResidentSession();
@@ -19,10 +21,16 @@ export async function submitAction(requestId: string) {
 
   const category = getCategory(submitted.categorySlug)?.name ?? submitted.categorySlug;
   const members = await boardMembers();
+  const siteUrl = await getSiteUrl();
   await Promise.all(
-    members.map((m) =>
-      sendEmail(m.email, `New ${category} request from ${submitted.address}`, `${submitted.address} submitted a ${category} request for the Board to review.`)
-    )
+    members.map(async (m) => {
+      const link = await signInLink(siteUrl, m.email, "board", `/board/${requestId}`);
+      await sendEmail(
+        m.email,
+        `New ${category} request from ${submitted.address}`,
+        `${submitted.address} submitted a ${category} request for the Board to review.\n\nReview it here: ${link}`
+      );
+    })
   );
 
   redirect(`/requests/${requestId}`);

@@ -2,6 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { supabase } from "./supabase";
 import { getAllBoardMembers } from "./residents";
+import { isResidentAuthor } from "../domain/message-display";
 import type {
   Answer,
   ArcRequest,
@@ -449,4 +450,42 @@ export function dueChip(request: ArcRequest): { label: string; urgency: DueUrgen
 
 export async function boardMembers(): Promise<BoardMember[]> {
   return getAllBoardMembers();
+}
+
+/** Records that this board member has now seen a request's current activity — clears its unread flag. */
+export async function markRequestViewed(requestId: string, boardMemberId: string): Promise<void> {
+  await supabase
+    .from("board_request_views")
+    .upsert(
+      { board_member_id: boardMemberId, request_id: requestId, last_viewed_at: new Date().toISOString() },
+      { onConflict: "board_member_id,request_id" }
+    );
+}
+
+/** Ids of requests with a resident-authored message newer than this board member's last view
+ * of that request (or never viewed at all) — drives the "unread reply" badge on the dashboard. */
+export async function getUnviewedResidentReplyRequestIds(boardMemberId: string): Promise<Set<string>> {
+  const [{ data: messages }, { data: views }, members] = await Promise.all([
+    supabase.from("official_messages").select("request_id, author_id, created_at"),
+    supabase.from("board_request_views").select("request_id, last_viewed_at").eq("board_member_id", boardMemberId),
+    getAllBoardMembers(),
+  ]);
+
+  const boardMemberIds = new Set(members.map((m) => m.id));
+  const lastViewedByRequestId = new Map((views ?? []).map((v) => [v.request_id as string, v.last_viewed_at as string]));
+
+  const latestResidentMessageAt = new Map<string, string>();
+  for (const m of (messages ?? []) as { request_id: string; author_id: string; created_at: string }[]) {
+    if (isResidentAuthor(m.author_id, boardMemberIds)) {
+      const existing = latestResidentMessageAt.get(m.request_id);
+      if (!existing || m.created_at > existing) latestResidentMessageAt.set(m.request_id, m.created_at);
+    }
+  }
+
+  const unread = new Set<string>();
+  for (const [requestId, messageAt] of latestResidentMessageAt) {
+    const lastViewed = lastViewedByRequestId.get(requestId);
+    if (!lastViewed || messageAt > lastViewed) unread.add(requestId);
+  }
+  return unread;
 }

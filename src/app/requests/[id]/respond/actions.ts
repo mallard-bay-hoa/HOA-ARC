@@ -6,6 +6,8 @@ import { getRequestById, addDocument, addOfficialMessageRaw, resubmitAfterInfoRe
 import { uploadDocumentFile, hasAllowedDocumentExtension } from "@/lib/storage";
 import { getCategory } from "@/lib/domain/categories";
 import { sendEmail } from "@/lib/email";
+import { signInLink } from "@/lib/data/auth";
+import { getSiteUrl } from "@/lib/site-url";
 
 export async function respondToInfoRequest(
   requestId: string,
@@ -46,14 +48,16 @@ export async function respondToInfoRequest(
 
   const category = getCategory(request.categorySlug)?.name ?? request.categorySlug;
   const members = await boardMembers();
+  const siteUrl = await getSiteUrl();
   await Promise.all(
-    members.map((m) =>
-      sendEmail(
+    members.map(async (m) => {
+      const link = await signInLink(siteUrl, m.email, "board", `/board/${requestId}`);
+      await sendEmail(
         m.email,
         `${request.address} responded to your info request`,
-        `${request.address} replied on their ${category} request:\n\n${body}`
-      )
-    )
+        `${request.address} replied on their ${category} request:\n\n${body}\n\nView it here: ${link}`
+      );
+    })
   );
 
   redirect(`/requests/${requestId}`);

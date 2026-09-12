@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getBoardSession } from "@/lib/session";
-import { getRequestById, getBoardComments, getOfficialMessages, getVotes, boardMembers } from "@/lib/data/requests";
+import { getRequestById, getBoardComments, getOfficialMessages, getVotes, boardMembers, markRequestViewed } from "@/lib/data/requests";
 import { getCategory } from "@/lib/domain/categories";
 import { formatAnswerEntries } from "@/lib/domain/answer-display";
 import { messageTypeLabel, isResidentAuthor } from "@/lib/domain/message-display";
@@ -19,6 +19,8 @@ export default async function BoardRequestDetailPage({ params }: { params: Promi
 
   const request = await getRequestById(id);
   if (!request) notFound();
+
+  await markRequestViewed(id, member.id);
 
   const comments = await getBoardComments(id);
   const messages = (await getOfficialMessages(id)).sort((a, b) => a.createdAt.localeCompare(b.createdAt));

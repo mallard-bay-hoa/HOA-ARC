@@ -6,6 +6,8 @@ import { getBoardSession } from "@/lib/session";
 import { addBoardComment, castVote, getOfficialMessages, requestMoreInfo } from "@/lib/data/requests";
 import { getCategory } from "@/lib/domain/categories";
 import { sendEmail } from "@/lib/email";
+import { signInLink } from "@/lib/data/auth";
+import { getSiteUrl } from "@/lib/site-url";
 import type { RequestStatus, VoteDecision } from "@/lib/domain/types";
 
 export async function addCommentAction(requestId: string, formData: FormData) {
@@ -29,10 +31,12 @@ export async function requestInfoAction(requestId: string, formData: FormData) {
   const request = await requestMoreInfo(requestId, member.id, body);
   const category = getCategory(request.categorySlug)?.name ?? request.categorySlug;
 
+  const siteUrl = await getSiteUrl();
+  const link = await signInLink(siteUrl, request.residentEmail, "resident", `/requests/${requestId}`);
   await sendEmail(
     request.residentEmail,
     `The Board needs more info on your ${category} request`,
-    `${body}\n\nReply by logging back into your request at Mallard Bay ARC.\n\nThe Board`
+    `${body}\n\nRespond here: ${link}\n\nThe Board`
   );
 
   revalidatePath(`/board/${requestId}`);
@@ -69,10 +73,12 @@ export async function castVoteAction(requestId: string, decision: VoteDecision, 
     const cited = decisionMessage?.citedSections ?? [];
     const category = getCategory(request.categorySlug)?.name ?? request.categorySlug;
     const conditionsLine = cited.length > 0 ? `\n\n${decision === "deny" ? "Citing" : "Conditions"}: ${cited.join(", ")}` : "";
+    const siteUrl = await getSiteUrl();
+    const link = await signInLink(siteUrl, request.residentEmail, "resident", `/requests/${requestId}`);
     await sendEmail(
       request.residentEmail,
       `Your ${category} request has been ${label}`,
-      `The Board has ${label} your request.${conditionsLine}\n\nThe Board`
+      `The Board has ${label} your request.${conditionsLine}\n\nView your request: ${link}\n\nThe Board`
     );
   }
 

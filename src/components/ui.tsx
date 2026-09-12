@@ -36,10 +36,11 @@ export function Button({
   variant = "primary",
   className,
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" | "danger" }) {
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "cta" | "ghost" | "danger" }) {
   const base = "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed";
   const variants = {
     primary: "border border-emerald-700 bg-white text-emerald-800 hover:bg-emerald-50",
+    cta: "bg-emerald-950 text-white font-bold hover:bg-emerald-900",
     ghost: "border border-emerald-200 text-emerald-800 hover:bg-emerald-50",
     danger: "border border-rose-300 text-rose-700 hover:bg-rose-50",
   };

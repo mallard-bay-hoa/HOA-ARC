@@ -31,7 +31,7 @@ export default async function MyRequestsPage() {
                 className="flex items-center justify-between gap-3 border-t border-slate-100 py-3 first:border-t-0 hover:bg-slate-50"
               >
                 <div>
-                  <div className="text-sm font-semibold text-slate-800">{getCategory(r.categorySlug)?.name}</div>
+                  <div className="text-sm font-semibold text-emerald-800 underline">{getCategory(r.categorySlug)?.name}</div>
                   <div className="text-xs text-slate-500">
                     {showAddressPerRow && <>{r.address} &middot; </>}
                     Submitted {new Date(r.submittedAt ?? r.createdAt).toLocaleDateString()}

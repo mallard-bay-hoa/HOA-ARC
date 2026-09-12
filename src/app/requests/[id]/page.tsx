@@ -95,8 +95,8 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
           </Card>
         )}
 
-        <Link href="/requests" className="mt-6 inline-block">
-          <Button variant="ghost">Done</Button>
+        <Link href="/requests" className="mt-6 inline-block text-sm text-emerald-100 hover:text-white">
+          Done
         </Link>
       </main>
     </>

@@ -95,6 +95,7 @@ interface OfficialMessageRow {
   message_type: MessageType;
   body: string;
   cited_sections: string[];
+  document_ids: string[];
   created_at: string;
 }
 
@@ -106,6 +107,7 @@ function rowToOfficialMessage(row: OfficialMessageRow): OfficialMessage {
     messageType: row.message_type,
     body: row.body,
     citedSections: row.cited_sections ?? [],
+    documentIds: row.document_ids ?? [],
     createdAt: row.created_at,
   };
 }
@@ -424,11 +426,19 @@ export async function addOfficialMessageRaw(
   authorId: string,
   messageType: MessageType,
   body: string,
-  citedSections: string[] = []
+  citedSections: string[] = [],
+  documentIds: string[] = []
 ): Promise<OfficialMessage> {
   const { data, error } = await supabase
     .from("official_messages")
-    .insert({ request_id: requestId, author_id: authorId, message_type: messageType, body, cited_sections: citedSections })
+    .insert({
+      request_id: requestId,
+      author_id: authorId,
+      message_type: messageType,
+      body,
+      cited_sections: citedSections,
+      document_ids: documentIds,
+    })
     .select("*")
     .single();
   if (error || !data) throw new Error(error?.message ?? "Failed to add message");

@@ -99,6 +99,7 @@ export interface OfficialMessage {
   messageType: MessageType;
   body: string;
   citedSections: string[]; // required for denied / approved_conditional (Utah HB 217)
+  documentIds: string[]; // documents (from the request's own list) uploaded alongside this message
   createdAt: string;
 }
 

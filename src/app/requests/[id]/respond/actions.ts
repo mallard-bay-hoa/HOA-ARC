@@ -30,10 +30,11 @@ export async function respondToInfoRequest(
     return { error: `"${invalid.name}" isn't an allowed file type. Only PDF, Word (.doc/.docx), JPG, or PNG are allowed.` };
   }
 
+  const uploadedDocumentIds: string[] = [];
   for (const file of files) {
     const bytes = new Uint8Array(await file.arrayBuffer());
     const result = await uploadDocumentFile({ name: file.name, bytes, mimeType: file.type, requestId });
-    await addDocument(requestId, {
+    const updated = await addDocument(requestId, {
       name: file.name,
       sizeBytes: file.size,
       mimeType: file.type,
@@ -41,9 +42,10 @@ export async function respondToInfoRequest(
       uploadedBy: session.email,
       uploadedAt: new Date().toISOString(),
     });
+    uploadedDocumentIds.push(updated.documents.at(-1)!.id);
   }
 
-  await addOfficialMessageRaw(requestId, session.email, "general", body);
+  await addOfficialMessageRaw(requestId, session.email, "general", body, [], uploadedDocumentIds);
   await resubmitAfterInfoRequest(requestId);
 
   const category = getCategory(request.categorySlug)?.name ?? request.categorySlug;

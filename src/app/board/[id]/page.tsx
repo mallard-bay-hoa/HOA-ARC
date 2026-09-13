@@ -9,7 +9,7 @@ import { TopBar } from "@/components/TopBar";
 import { Card, StatusPill, FlagRow, Button } from "@/components/ui";
 import { DocumentLinks } from "@/components/DocumentLinks";
 import { AutoGrowTextarea } from "@/components/AutoGrowTextarea";
-import { BoardTabs, type BoardTabKey } from "./BoardTabs";
+import { BoardTabs, GoToTabLink, type BoardTabKey } from "./BoardTabs";
 import { addCommentAction, requestInfoAction, castVoteAction } from "./actions";
 
 const VALID_TABS: readonly BoardTabKey[] = ["details", "documents", "discussion", "communication"];
@@ -145,6 +145,12 @@ export default async function BoardRequestDetailPage({
                 {m.citedSections.length > 0 && (
                   <div className="mt-1 text-xs text-slate-500">
                     {m.messageType === "approved_conditional" ? "Conditions" : "Citing"}: {m.citedSections.join(", ")}
+                  </div>
+                )}
+                {m.documentIds.length > 0 && (
+                  <div className="mt-1 text-xs text-slate-500">
+                    {m.documentIds.length === 1 ? "Document" : `${m.documentIds.length} documents`} uploaded — see the{" "}
+                    <GoToTabLink tab="documents">Documents tab</GoToTabLink>
                   </div>
                 )}
               </div>

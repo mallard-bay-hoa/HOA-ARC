@@ -3,9 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { getResidentSession } from "@/lib/session";
 import { getRequestById } from "@/lib/data/requests";
 import { TopBar } from "@/components/TopBar";
-import { Card, Button } from "@/components/ui";
-import { submitAction } from "./actions";
-import { UploadForm } from "./UploadForm";
+import { Card } from "@/components/ui";
+import { SubmitForm } from "./SubmitForm";
 
 export default async function ReviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -16,7 +15,6 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
   if (!request || !session.addresses.includes(request.address)) notFound();
 
   const description = typeof request.answers.description === "string" ? request.answers.description : "";
-  const boundSubmit = submitAction.bind(null, request.id);
 
   return (
     <>
@@ -34,13 +32,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
             You&rsquo;ve certified that you understand and will comply with government and HOA requirements.
           </p>
 
-          <UploadForm requestId={request.id} documents={request.documents} />
-
-          <form action={boundSubmit} className="mt-6">
-            <Button type="submit" variant="cta" className="w-full sm:w-auto">
-              Submit Request
-            </Button>
-          </form>
+          <SubmitForm requestId={request.id} documents={request.documents} />
         </Card>
       </main>
     </>

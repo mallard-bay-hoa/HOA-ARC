@@ -4,32 +4,23 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui";
 import { FileUploadField } from "@/components/FileUploadField";
 import { DocumentLinks } from "@/components/DocumentLinks";
-import { uploadDocumentAction } from "./actions";
+import { submitAction } from "./actions";
 import { removeDocumentAction } from "../actions";
 import type { Document } from "@/lib/domain/types";
 
-export function UploadForm({ requestId, documents }: { requestId: string; documents: Document[] }) {
-  const boundUpload = uploadDocumentAction.bind(null, requestId);
-  const [state, formAction, pending] = useActionState(boundUpload, undefined);
+export function SubmitForm({ requestId, documents }: { requestId: string; documents: Document[] }) {
+  const boundAction = submitAction.bind(null, requestId);
+  const [state, formAction, pending] = useActionState(boundAction, undefined);
 
   return (
     <div className="mt-6 border-t border-slate-100 pt-6">
-      <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Attach a file</h3>
-      <form action={formAction} className="flex flex-col gap-3">
-        {/* Keyed on documents.length so a successful upload (which grows this
-            list via the action's revalidatePath) remounts the field and
-            clears its picked files — no effect needed to reset it. */}
-        <FileUploadField key={documents.length} />
-        {state?.error && <p className="text-sm text-rose-700">{state.error}</p>}
-        <Button type="submit" variant="ghost" disabled={pending} className="w-fit">
-          {pending ? "Uploading…" : "Upload"}
-        </Button>
-      </form>
+      {/* Documents only appear here if a prior submit attempt uploaded some but
+          failed before finishing — normal flow uploads and submits together
+          below, so there's nothing to manage separately beforehand. */}
       {documents.length > 0 && (
         <>
-          <hr className="mt-6 border-slate-100" />
-          <h3 className="mb-2 mt-4 text-xs font-medium uppercase tracking-wide text-slate-500">Uploaded Files</h3>
-          <ul className="space-y-1 text-sm text-slate-600">
+          <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Attached Files</h3>
+          <ul className="mb-4 space-y-1 text-sm text-slate-600">
             {documents.map((d) => (
               <li key={d.id} className="flex items-center justify-between gap-3">
                 <span>
@@ -52,6 +43,13 @@ export function UploadForm({ requestId, documents }: { requestId: string; docume
           </ul>
         </>
       )}
+      <form action={formAction} className="flex flex-col gap-4">
+        <FileUploadField />
+        {state?.error && <p className="text-sm text-rose-700">{state.error}</p>}
+        <Button type="submit" variant="cta" disabled={pending} className="w-full sm:w-auto">
+          {pending ? "Submitting…" : "Submit Request"}
+        </Button>
+      </form>
     </div>
   );
 }

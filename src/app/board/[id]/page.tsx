@@ -201,7 +201,7 @@ export default async function BoardRequestDetailPage({
               <label htmlFor="approve-cited-sections" className="sr-only">
                 Conditions for approval, optional
               </label>
-              <input
+              <AutoGrowTextarea
                 id="approve-cited-sections"
                 name="citedSections"
                 placeholder="Optional: conditions, comma-separated"
@@ -215,7 +215,7 @@ export default async function BoardRequestDetailPage({
               <label htmlFor="deny-cited-sections" className="sr-only">
                 Cited section(s), required to deny
               </label>
-              <input
+              <AutoGrowTextarea
                 id="deny-cited-sections"
                 name="citedSections"
                 placeholder="Cite section(s), e.g. HOA Rule 4, comma-separated"

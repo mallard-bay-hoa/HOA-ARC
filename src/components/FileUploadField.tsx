@@ -6,13 +6,24 @@ import { Button } from "./ui";
 const ACCEPT =
   ".pdf,.doc,.docx,.jpg,.jpeg,.png,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png";
 
+// Server Actions cap the whole request body at 20MB (see next.config.ts) —
+// stay a bit under that so form fields/multipart overhead never push a
+// selection that looked fine here over the server's limit, where it would
+// otherwise fail with no error reaching the page.
+const MAX_TOTAL_BYTES = 18 * 1024 * 1024;
+
 function sameFile(a: File, b: File): boolean {
   return a.name === b.name && a.size === b.size && a.lastModified === b.lastModified;
+}
+
+function formatMB(bytes: number): string {
+  return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 }
 
 export function FileUploadField({ name = "file" }: { name?: string }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   function syncNativeInput(next: File[]) {
     const dt = new DataTransfer();
@@ -26,6 +37,12 @@ export function FileUploadField({ name = "file" }: { name?: string }) {
     for (const f of picked) {
       if (!merged.some((m) => sameFile(m, f))) merged.push(f);
     }
+    const totalBytes = merged.reduce((sum, f) => sum + f.size, 0);
+    if (totalBytes > MAX_TOTAL_BYTES) {
+      setError(`Those files add up to ${formatMB(totalBytes)}, which is over the ${formatMB(MAX_TOTAL_BYTES)} limit. Remove one or attach smaller files.`);
+      return;
+    }
+    setError(null);
     syncNativeInput(merged);
     setFiles(merged);
   }
@@ -34,6 +51,7 @@ export function FileUploadField({ name = "file" }: { name?: string }) {
     const next = files.filter((_, i) => i !== index);
     syncNativeInput(next);
     setFiles(next);
+    setError(null);
   }
 
   return (
@@ -66,7 +84,8 @@ export function FileUploadField({ name = "file" }: { name?: string }) {
           ))}
         </ul>
       )}
-      <p className="text-xs text-slate-500">PDF, Word (.doc/.docx), JPG, or PNG only.</p>
+      {error && <p className="text-sm text-rose-700">{error}</p>}
+      <p className="text-xs text-slate-500">PDF, Word (.doc/.docx), JPG, or PNG only, up to {formatMB(MAX_TOTAL_BYTES)} total.</p>
     </div>
   );
 }

@@ -232,6 +232,31 @@ export async function listAllRequests(): Promise<ArcRequest[]> {
     .sort((a, b) => (a.slaDueAt ?? "").localeCompare(b.slaDueAt ?? ""));
 }
 
+/** Non-draft requests, most recent activity first. Activity is anything that touches a request:
+ * the request row itself changing (submission, status, documents) or a new board comment,
+ * official message, or vote — those live in other tables and don't bump updated_at. */
+export async function listRequestsByRecentActivity(): Promise<ArcRequest[]> {
+  const [requests, comments, messages, votes] = await Promise.all([
+    listAllRequests(),
+    supabase.from("board_comments").select("request_id, created_at"),
+    supabase.from("official_messages").select("request_id, created_at"),
+    supabase.from("votes").select("request_id, created_at"),
+  ]);
+
+  const lastActivity = new Map<string, number>();
+  for (const r of requests) lastActivity.set(r.id, Math.max(Date.parse(r.updatedAt), Date.parse(r.createdAt)));
+
+  for (const result of [comments, messages, votes]) {
+    for (const row of (result.data ?? []) as { request_id: string; created_at: string }[]) {
+      const current = lastActivity.get(row.request_id);
+      const at = Date.parse(row.created_at);
+      if (current !== undefined && at > current) lastActivity.set(row.request_id, at);
+    }
+  }
+
+  return requests.sort((a, b) => lastActivity.get(b.id)! - lastActivity.get(a.id)!);
+}
+
 export async function addDocument(requestId: string, doc: Omit<Document, "id">): Promise<ArcRequest> {
   const request = await fetchRequest(requestId);
   const documents = [...request.documents, { ...doc, id: randomUUID() }];

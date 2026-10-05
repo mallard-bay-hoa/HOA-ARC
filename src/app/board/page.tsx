@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getBoardSession } from "@/lib/session";
-import { listAllRequests, dueChip, getUnviewedResidentReplyRequestIds } from "@/lib/data/requests";
+import { listRequestsByRecentActivity, dueChip, getUnviewedResidentReplyRequestIds } from "@/lib/data/requests";
 import { getCategory } from "@/lib/domain/categories";
 import { TopBar } from "@/components/TopBar";
 import { Card, StatusPill, DueChip } from "@/components/ui";
@@ -10,7 +10,7 @@ export default async function BoardDashboardPage() {
   const member = await getBoardSession();
   if (!member) redirect("/board/signin");
 
-  const requests = await listAllRequests();
+  const requests = await listRequestsByRecentActivity();
   const unreadRequestIds = await getUnviewedResidentReplyRequestIds(member.id);
 
   return (

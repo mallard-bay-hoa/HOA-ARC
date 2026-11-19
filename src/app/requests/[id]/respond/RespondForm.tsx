@@ -21,7 +21,8 @@ export function RespondForm({ requestId }: { requestId: string }) {
       const prepared = await withDirectUploads(requestId, formData);
       if (prepared instanceof FormData) startTransition(() => formAction(prepared));
       else setUploadError(prepared.error);
-    } catch {
+    } catch (e) {
+      console.error("Attachment upload failed", e);
       setUploadError("Something went wrong uploading your files. Please try again.");
     } finally {
       setUploading(false);

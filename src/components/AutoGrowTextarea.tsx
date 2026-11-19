@@ -1,11 +1,17 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { clsx } from "clsx";
 
+// Sizes the box to its content. When empty, size to the placeholder instead
+// (browsers don't count it in scrollHeight), so a placeholder that wraps on a
+// narrow screen isn't clipped. Swapping the value in briefly fires no events.
 function resize(el: HTMLTextAreaElement) {
+  const measurePlaceholder = el.value === "" && el.placeholder !== "";
+  if (measurePlaceholder) el.value = el.placeholder;
   el.style.height = "auto";
   el.style.height = `${el.scrollHeight}px`;
+  if (measurePlaceholder) el.value = "";
 }
 
 export function AutoGrowTextarea({
@@ -28,6 +34,21 @@ export function AutoGrowTextarea({
   onChange?: () => void;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
+
+  // Size on mount and whenever the width changes (rotating a phone, resizing
+  // the window), since that's what changes how the text wraps.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let lastWidth = -1;
+    const observer = new ResizeObserver(() => {
+      if (el.clientWidth === lastWidth) return;
+      lastWidth = el.clientWidth;
+      resize(el);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <textarea

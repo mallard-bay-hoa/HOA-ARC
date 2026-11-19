@@ -1,12 +1,11 @@
-import { createClient } from "@supabase/supabase-js";
 import { prepareUploadsAction } from "@/app/requests/[id]/actions";
 
 // Browser-side half of direct uploads. Vercel rejects request bodies over
 // ~4.5MB before our code runs, so attachments go from the browser straight to
-// Supabase Storage using one-time signed tokens issued by prepareUploadsAction.
+// Supabase Storage using one-time signed URLs issued by prepareUploadsAction.
 // The form then submits only the resulting paths (the `uploaded` field).
-
-const BUCKET = "documents";
+// The signed URL carries its own authorization, so no Supabase key is needed
+// in the browser (NEXT_PUBLIC_SUPABASE_ANON_KEY isn't set on Vercel).
 
 export type UploadOutcome = { error: string } | { uploaded: { name: string; storagePath: string }[] };
 
@@ -19,20 +18,20 @@ export async function uploadFilesDirect(requestId: string, files: File[]): Promi
   );
   if ("error" in prepared) return prepared;
 
-  // Signed tokens carry the authorization; the anon key is just the public client key.
-  const storage = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { auth: { persistSession: false } }
-  ).storage.from(BUCKET);
-
   const uploaded: { name: string; storagePath: string }[] = [];
   for (const [i, file] of files.entries()) {
-    const { storagePath, token } = prepared.uploads[i];
-    const { error } = await storage.uploadToSignedUrl(storagePath, token, file, {
-      contentType: file.type || undefined,
-    });
-    if (error) return { error: `"${file.name}" couldn't be uploaded (${error.message}). Please try again.` };
+    const { storagePath, signedUrl } = prepared.uploads[i];
+    let res: Response;
+    try {
+      res = await fetch(signedUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type || "application/octet-stream", "x-upsert": "false" },
+        body: file,
+      });
+    } catch {
+      return { error: `"${file.name}" couldn't be uploaded. Check your connection and try again.` };
+    }
+    if (!res.ok) return { error: `"${file.name}" couldn't be uploaded (error ${res.status}). Please try again.` };
     uploaded.push({ name: file.name, storagePath });
   }
   return { uploaded };

@@ -20,7 +20,8 @@ export const MAX_TOTAL_UPLOAD_BYTES = 18 * 1024 * 1024;
 
 export interface PreparedUpload {
   storagePath: string;
-  token: string;
+  /** One-time URL the browser PUTs the file to; the token in it is the authorization. */
+  signedUrl: string;
 }
 
 export interface UploadedFileRef {
@@ -52,7 +53,7 @@ export async function createSignedUploads(requestId: string, files: { name: stri
       const storagePath = `${requestId}/${randomUUID()}-${safeKeyName(file.name)}`;
       const { data, error } = await supabase.storage.from(BUCKET).createSignedUploadUrl(storagePath);
       if (error || !data) throw new Error(error?.message ?? "Could not prepare upload");
-      return { storagePath, token: data.token };
+      return { storagePath, signedUrl: data.signedUrl };
     })
   );
 }

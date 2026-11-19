@@ -56,16 +56,16 @@ export default async function BoardRequestDetailPage({
           &larr; Back to All Requests
         </Link>
         <Card>
-          <div className="space-y-6">
+          <div className="space-y-12">
             <section className="space-y-4">
               <div>
-                <h3 className="text-xs font-medium uppercase tracking-wide text-slate-500">Resident</h3>
+                <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900">Resident</h3>
                 <p className="text-sm text-slate-800">
                   {request.residentName} &middot; {request.residentEmail}
                 </p>
               </div>
               <div>
-                <h3 className="text-xs font-medium uppercase tracking-wide text-slate-500">Project Description</h3>
+                <h3 className="text-sm font-bold uppercase tracking-wide text-slate-900">Project Description</h3>
                 <p className="whitespace-pre-wrap text-sm text-slate-800">
                   {typeof description === "string" && description.trim() ? description : "—"}
                 </p>
@@ -89,8 +89,8 @@ export default async function BoardRequestDetailPage({
               </div>
             </section>
 
-            <section className="border-t border-slate-200 pt-6">
-              <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500">Vote &amp; Decide</h3>
+            <section className="border-t border-slate-300 pt-12">
+              <h3 className="mb-1 text-sm font-bold uppercase tracking-wide text-slate-900">Vote &amp; Decide</h3>
               <p className="mb-3 text-xs text-slate-500">
                 2 matching votes required, either way &middot; {approveCount} approve / {denyCount} deny so far
               </p>
@@ -130,8 +130,8 @@ export default async function BoardRequestDetailPage({
               )}
             </section>
 
-            <section className="border-t border-slate-200 pt-6">
-              <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500">Internal Communication</h3>
+            <section className="border-t border-slate-300 pt-12">
+              <h3 className="mb-1 text-sm font-bold uppercase tracking-wide text-slate-900">Internal Communication</h3>
               <p className="mb-3 text-xs text-slate-600">Never visible to the resident.</p>
               <div className="space-y-2">
                 {comments.map((c) => (
@@ -157,8 +157,8 @@ export default async function BoardRequestDetailPage({
               </form>
             </section>
 
-            <section className="border-t border-slate-200 pt-6">
-              <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Resident Requested Info</h3>
+            <section className="border-t border-slate-300 pt-12">
+              <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-slate-900">Resident Requested Info</h3>
               <div className="space-y-2">
                 {messages.map((m) => {
                   const isFromResident = isResidentAuthor(m.authorId, boardMemberIds);

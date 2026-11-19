@@ -23,7 +23,7 @@ export default async function NewRequestPage({
         <TopBar eyebrow="Mallard Bay ARC" title="A couple more details" />
         <main className="mx-auto w-full max-w-md flex-1 px-6 py-10">
           <Card>
-            <h2 className="text-base font-semibold text-slate-900">Tell us who you are</h2>
+            <h2 className="text-base font-bold text-slate-900">Tell us who you are</h2>
             <p className="mt-1 text-sm text-slate-600">
               We don&rsquo;t have a name or property address on file for this email yet.
             </p>

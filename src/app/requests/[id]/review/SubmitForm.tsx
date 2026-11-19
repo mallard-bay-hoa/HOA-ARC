@@ -39,7 +39,7 @@ export function SubmitForm({ requestId, documents }: { requestId: string; docume
           below, so there's nothing to manage separately beforehand. */}
       {documents.length > 0 && (
         <>
-          <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Attached Files</h3>
+          <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-slate-900">Attached Files</h3>
           <ul className="mb-4 space-y-1 text-sm text-slate-600">
             {documents.map((d) => (
               <li key={d.id} className="flex items-center justify-between gap-3">

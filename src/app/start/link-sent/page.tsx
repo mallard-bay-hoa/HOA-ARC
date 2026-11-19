@@ -15,7 +15,7 @@ export default async function LinkSentPage({
       <TopBar eyebrow="Mallard Bay ARC" title="Check your email" />
       <main className="mx-auto w-full max-w-md flex-1 px-6 py-10">
         <Card>
-          <h2 className="text-base font-semibold text-slate-900">We emailed you a link</h2>
+          <h2 className="text-base font-bold text-slate-900">We emailed you a link</h2>
           <p className="mt-1 text-sm text-slate-600">
             Click the link in your email to continue. It also works to come back and request a new one any
             time.

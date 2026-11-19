@@ -25,7 +25,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
         </Link>
         <Card>
           <div>
-            <h2 className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500">Project Description</h2>
+            <h2 className="mb-1 text-sm font-bold uppercase tracking-wide text-slate-900">Project Description</h2>
             <p className="whitespace-pre-wrap text-sm text-slate-700">{description}</p>
           </div>
           <p className="mt-3 text-sm text-slate-600">

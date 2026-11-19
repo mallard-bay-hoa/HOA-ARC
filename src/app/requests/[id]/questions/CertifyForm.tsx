@@ -24,7 +24,7 @@ export function CertifyForm({
   return (
     <form action={formAction} className="flex flex-col gap-6">
       <div>
-        <h2 className="mb-2 text-sm font-semibold text-slate-900">Government and HOA requirements</h2>
+        <h2 className="mb-2 text-sm font-bold text-slate-900">Government and HOA requirements</h2>
         <ul className="flex flex-col gap-3">
           {requirements.map((r, i) => (
             <li key={i} className="border-t border-slate-100 pt-3 first:border-t-0 first:pt-0">

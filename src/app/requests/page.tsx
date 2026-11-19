@@ -21,7 +21,7 @@ export default async function MyRequestsPage() {
       />
       <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-10">
         <Card>
-          <h2 className="text-base font-semibold text-slate-900">Your requests</h2>
+          <h2 className="text-base font-bold text-slate-900">Your requests</h2>
           {requests.length === 0 && <p className="mt-4 text-sm text-slate-500">You haven&rsquo;t submitted any requests yet.</p>}
           <div className="mt-2">
             {requests.map((r) => (

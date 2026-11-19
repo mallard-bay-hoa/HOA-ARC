@@ -41,7 +41,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
         )}
 
         <Card>
-          <h2 className="mb-2 text-sm font-semibold text-slate-800">Messages from the Board</h2>
+          <h2 className="mb-2 text-sm font-bold text-slate-800">Messages from the Board</h2>
           {messages.map((m) => {
             const isSelf = m.authorId === session.email;
             const isFromResident = isResidentAuthor(m.authorId, boardMemberIds);
@@ -76,7 +76,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
 
         {request.documents.length > 0 && (
           <Card className="mt-6">
-            <h2 className="mb-2 text-sm font-semibold text-slate-800">Documents</h2>
+            <h2 className="mb-2 text-sm font-bold text-slate-800">Documents</h2>
             <ul className="space-y-1 text-sm text-slate-600">
               {request.documents.map((d) => (
                 <li key={d.id} className="flex items-center justify-between gap-3">

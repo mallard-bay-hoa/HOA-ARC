@@ -6,10 +6,9 @@ import { Button } from "./ui";
 const ACCEPT =
   ".pdf,.doc,.docx,.jpg,.jpeg,.png,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png";
 
-// Server Actions cap the whole request body at 20MB (see next.config.ts) —
-// stay a bit under that so form fields/multipart overhead never push a
-// selection that looked fine here over the server's limit, where it would
-// otherwise fail with no error reaching the page.
+// Files upload straight to Storage (see upload-client.ts), not through a
+// Server Action, so Vercel's ~4.5MB request cap doesn't apply. This is our own
+// total cap; keep it in sync with MAX_TOTAL_UPLOAD_BYTES in lib/storage.ts.
 const MAX_TOTAL_BYTES = 18 * 1024 * 1024;
 
 function sameFile(a: File, b: File): boolean {

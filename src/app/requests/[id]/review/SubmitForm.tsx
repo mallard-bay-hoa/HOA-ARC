@@ -1,16 +1,35 @@
 "use client";
 
-import { useActionState } from "react";
+import { startTransition, useActionState, useState } from "react";
 import { Button } from "@/components/ui";
 import { FileUploadField } from "@/components/FileUploadField";
 import { DocumentLinks } from "@/components/DocumentLinks";
 import { submitAction } from "./actions";
+import { withDirectUploads } from "@/lib/upload-client";
 import { removeDocumentAction } from "../actions";
 import type { Document } from "@/lib/domain/types";
 
 export function SubmitForm({ requestId, documents }: { requestId: string; documents: Document[] }) {
   const boundAction = submitAction.bind(null, requestId);
   const [state, formAction, pending] = useActionState(boundAction, undefined);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // Files are uploaded from the browser straight to Storage first (Vercel
+  // rejects request bodies over ~4.5MB); the action only receives their paths.
+  async function handleSubmit(formData: FormData) {
+    setUploadError(null);
+    setUploading(true);
+    try {
+      const prepared = await withDirectUploads(requestId, formData);
+      if (prepared instanceof FormData) startTransition(() => formAction(prepared));
+      else setUploadError(prepared.error);
+    } catch {
+      setUploadError("Something went wrong uploading your files. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   return (
     <div className="mt-6 border-t border-slate-100 pt-6">
@@ -43,11 +62,11 @@ export function SubmitForm({ requestId, documents }: { requestId: string; docume
           </ul>
         </>
       )}
-      <form action={formAction} className="flex flex-col gap-4">
+      <form action={handleSubmit} className="flex flex-col gap-4">
         <FileUploadField />
-        {state?.error && <p className="text-sm text-rose-700">{state.error}</p>}
-        <Button type="submit" variant="cta" disabled={pending} className="w-full sm:w-auto">
-          {pending ? "Submitting…" : "Submit Request"}
+        {(uploadError ?? state?.error) && <p className="text-sm text-rose-700">{uploadError ?? state?.error}</p>}
+        <Button type="submit" variant="cta" disabled={pending || uploading} className="w-full sm:w-auto">
+          {pending || uploading ? "Submitting…" : "Submit Request"}
         </Button>
       </form>
     </div>

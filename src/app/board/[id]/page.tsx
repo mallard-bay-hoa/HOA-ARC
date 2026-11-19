@@ -3,27 +3,20 @@ import { notFound, redirect } from "next/navigation";
 import { getBoardSession } from "@/lib/session";
 import { getRequestById, getBoardComments, getOfficialMessages, getVotes, boardMembers, markRequestViewed } from "@/lib/data/requests";
 import { getCategory } from "@/lib/domain/categories";
-import { formatAnswerEntries } from "@/lib/domain/answer-display";
 import { messageTypeLabel, isResidentAuthor } from "@/lib/domain/message-display";
 import { TopBar } from "@/components/TopBar";
-import { Card, StatusPill, FlagRow, Button } from "@/components/ui";
+import { Card, StatusPill, Button } from "@/components/ui";
 import { DocumentLinks } from "@/components/DocumentLinks";
 import { AutoGrowTextarea } from "@/components/AutoGrowTextarea";
-import { BoardTabs, GoToTabLink, type BoardTabKey } from "./BoardTabs";
+import { VoteForm } from "./VoteForm";
 import { addCommentAction, requestInfoAction, castVoteAction } from "./actions";
-
-const VALID_TABS: readonly BoardTabKey[] = ["details", "documents", "discussion", "communication"];
 
 export default async function BoardRequestDetailPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: string }>;
 }) {
   const { id } = await params;
-  const { tab } = await searchParams;
-  const initialTab = VALID_TABS.find((t) => t === tab);
   const member = await getBoardSession();
   if (!member) redirect("/board/signin");
 
@@ -49,193 +42,7 @@ export default async function BoardRequestDetailPage({
   const boundComment = addCommentAction.bind(null, id);
   const boundInfoRequest = requestInfoAction.bind(null, id);
 
-  const details = (
-    <div className="space-y-4">
-      <div>
-        <h3 className="text-xs font-medium uppercase tracking-wide text-slate-500">Resident</h3>
-        <p className="text-sm text-slate-800">
-          {request.residentName} &middot; {request.residentEmail}
-        </p>
-      </div>
-      <div>
-        <h3 className="text-xs font-medium uppercase tracking-wide text-slate-500">Answers</h3>
-        <dl className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-          {formatAnswerEntries(request.answers).map(({ id, label, value }) => (
-            <div key={id} className="contents">
-              <dt className="text-slate-500">{label}</dt>
-              <dd className="text-slate-800">{value}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-      {request.flags.length > 0 && (
-        <div>
-          <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500">Flags from intake</h3>
-          {request.flags.map((f, i) => (
-            <FlagRow key={i} flag={f} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-
-  const documents = (
-    <div>
-      {request.documents.length === 0 ? (
-        <p className="text-sm text-slate-500">No documents attached.</p>
-      ) : (
-        <ul className="space-y-1 text-sm text-slate-700">
-          {request.documents.map((d) => (
-            <li key={d.id} className="flex items-center justify-between gap-3">
-              <span>
-                {d.name} ({Math.round(d.sizeBytes / 1024)} KB)
-              </span>
-              <DocumentLinks requestId={request.id} documentId={d.id} documentName={d.name} />
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-
-  const discussion = (
-    <div>
-      <p className="mb-3 text-xs text-slate-600">Never visible to the resident.</p>
-      <div className="space-y-2">
-        {comments.map((c) => (
-          <div key={c.id} className="rounded-md bg-slate-100 px-3 py-2 text-sm">
-            <div className="text-xs font-mono uppercase tracking-wide text-slate-500">{c.authorName}</div>
-            <div className="text-slate-700">{c.body}</div>
-          </div>
-        ))}
-      </div>
-      <form action={boundComment} className="mt-3 flex items-end gap-2">
-        <label htmlFor="board-comment-body" className="sr-only">
-          Add a comment for the Board only
-        </label>
-        <AutoGrowTextarea
-          id="board-comment-body"
-          name="body"
-          placeholder="Add a comment for the Board only…"
-          className="flex-1 rounded-md border border-slate-500 px-3 py-2 text-sm"
-        />
-        <Button type="submit" variant="ghost">
-          Post
-        </Button>
-      </form>
-    </div>
-  );
-
-  const communication = (
-    <div className="space-y-6">
-      <div>
-        <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Messages to the resident</h3>
-        <div className="space-y-2">
-          {messages.map((m) => {
-            const isFromResident = isResidentAuthor(m.authorId, boardMemberIds);
-            return (
-              <div
-                key={m.id}
-                className={`border-t border-slate-100 pt-2 text-sm ${isFromResident ? "ml-4 border-l-2 border-emerald-200 pl-3" : ""}`}
-              >
-                <div className="text-xs font-mono uppercase tracking-wide text-slate-500">
-                  {`${new Date(m.createdAt).toLocaleDateString()} — ${messageTypeLabel(m.messageType, isFromResident)}`}
-                </div>
-                <div className="text-slate-700">{m.body}</div>
-                {m.citedSections.length > 0 && (
-                  <div className="mt-1 text-xs text-slate-500">
-                    {m.messageType === "approved_conditional" ? "Conditions" : "Citing"}: {m.citedSections.join(", ")}
-                  </div>
-                )}
-                {m.documentIds.length > 0 && (
-                  <div className="mt-1 text-xs text-slate-500">
-                    {m.documentIds.length === 1 ? "Document" : `${m.documentIds.length} documents`} uploaded — see the{" "}
-                    <GoToTabLink tab="documents">Documents tab</GoToTabLink>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-        {!decided && (
-          <form action={boundInfoRequest} className="mt-3 flex items-end gap-2">
-            <label htmlFor="info-request-body" className="sr-only">
-              Request more info from the resident
-            </label>
-            <AutoGrowTextarea
-              id="info-request-body"
-              name="body"
-              placeholder="Request more info from the resident…"
-              className="flex-1 rounded-md border border-slate-500 px-3 py-2 text-sm"
-            />
-            <Button type="submit" variant="ghost">
-              Send
-            </Button>
-          </form>
-        )}
-      </div>
-
-      <div className="border-t border-slate-100 pt-4">
-        <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500">Vote &amp; Decide</h3>
-        <p className="mb-3 text-xs text-slate-500">
-          2 matching votes required, either way &middot; {approveCount} approve / {denyCount} deny so far
-        </p>
-
-        {isOwnRequest ? (
-          <p className="rounded-md bg-slate-100 p-3 text-sm text-slate-600">
-            This request is tied to your own address — you cannot vote on it.
-          </p>
-        ) : decided ? (
-          <p className="rounded-md bg-emerald-50 p-3 text-sm text-emerald-800">
-            Decision recorded: <StatusPill status={request.status} />
-          </p>
-        ) : (
-          <div>
-            {myVote && (
-              <p className="mb-2 text-xs text-slate-500">
-                {`You voted to ${myVote.decision} — submit again below to change it.`}
-              </p>
-            )}
-            <div className="flex flex-col gap-3 sm:flex-row">
-            <form action={boundApprove} className="flex-1 space-y-2">
-              <label htmlFor="approve-cited-sections" className="sr-only">
-                Conditions for approval, optional
-              </label>
-              <AutoGrowTextarea
-                id="approve-cited-sections"
-                name="citedSections"
-                placeholder="Optional: conditions, comma-separated"
-                className="w-full rounded-md border border-slate-500 px-3 py-2 text-xs"
-              />
-              <Button type="submit" variant="cta" className="w-full">
-                Approve
-              </Button>
-            </form>
-            <form action={boundDeny} className="flex-1 space-y-2">
-              <label htmlFor="deny-cited-sections" className="sr-only">
-                Cited section(s), required to deny
-              </label>
-              <AutoGrowTextarea
-                id="deny-cited-sections"
-                name="citedSections"
-                placeholder="Cite section(s), e.g. HOA Rule 4, comma-separated"
-                aria-describedby="deny-cited-sections-helper"
-                required
-                className="w-full rounded-md border border-slate-500 px-3 py-2 text-xs"
-              />
-              <Button type="submit" variant="danger" className="w-full">
-                Deny
-              </Button>
-              <p id="deny-cited-sections-helper" className="text-xs text-slate-500">
-                Required to deny — cites the specific rule the plan doesn&rsquo;t conform to (Utah HB 217).
-              </p>
-            </form>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  const description = request.answers.description;
 
   return (
     <>
@@ -249,13 +56,156 @@ export default async function BoardRequestDetailPage({
           &larr; Back to All Requests
         </Link>
         <Card>
-          <BoardTabs
-            details={details}
-            documents={documents}
-            discussion={discussion}
-            communication={communication}
-            initialTab={initialTab}
-          />
+          <div className="space-y-6">
+            <section className="space-y-4">
+              <div>
+                <h3 className="text-xs font-medium uppercase tracking-wide text-slate-500">Resident</h3>
+                <p className="text-sm text-slate-800">
+                  {request.residentName} &middot; {request.residentEmail}
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xs font-medium uppercase tracking-wide text-slate-500">Project Description</h3>
+                <p className="whitespace-pre-wrap text-sm text-slate-800">
+                  {typeof description === "string" && description.trim() ? description : "—"}
+                </p>
+              </div>
+              {/* Attachments read as part of the description, so no heading of their own. */}
+              <div id="documents">
+                {request.documents.length === 0 ? (
+                  <p className="text-sm text-slate-500">No documents attached.</p>
+                ) : (
+                  <ul className="space-y-1 text-sm text-slate-700">
+                    {request.documents.map((d) => (
+                      <li key={d.id} className="flex items-center justify-between gap-3">
+                        <span>
+                          {d.name} ({Math.round(d.sizeBytes / 1024)} KB)
+                        </span>
+                        <DocumentLinks requestId={request.id} documentId={d.id} documentName={d.name} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </section>
+
+            <section className="border-t border-slate-200 pt-6">
+              <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500">Vote &amp; Decide</h3>
+              <p className="mb-3 text-xs text-slate-500">
+                2 matching votes required, either way &middot; {approveCount} approve / {denyCount} deny so far
+              </p>
+
+              {isOwnRequest ? (
+                <p className="rounded-md bg-slate-100 p-3 text-sm text-slate-600">
+                  This request is tied to your own address — you cannot vote on it.
+                </p>
+              ) : decided ? (
+                <p className="rounded-md bg-emerald-50 p-3 text-sm text-emerald-800">
+                  Decision recorded: <StatusPill status={request.status} />
+                </p>
+              ) : (
+                <div>
+                  {myVote && (
+                    <p className="mb-2 text-xs text-slate-500">
+                      {`You voted to ${myVote.decision} — submit again below to change it.`}
+                    </p>
+                  )}
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <VoteForm
+                      action={boundApprove}
+                      decision="approve"
+                      id="approve-message"
+                      label="Message for approval, optional"
+                      placeholder="Message (optional)"
+                    />
+                    <VoteForm
+                      action={boundDeny}
+                      decision="deny"
+                      id="deny-message"
+                      label="Message for denial, required"
+                      placeholder="Message"
+                    />
+                  </div>
+                </div>
+              )}
+            </section>
+
+            <section className="border-t border-slate-200 pt-6">
+              <h3 className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500">Internal Communication</h3>
+              <p className="mb-3 text-xs text-slate-600">Never visible to the resident.</p>
+              <div className="space-y-2">
+                {comments.map((c) => (
+                  <div key={c.id} className="rounded-md bg-slate-100 px-3 py-2 text-sm">
+                    <div className="text-xs font-mono uppercase tracking-wide text-slate-500">{c.authorName}</div>
+                    <div className="text-slate-700">{c.body}</div>
+                  </div>
+                ))}
+              </div>
+              <form action={boundComment} className="mt-3 flex items-end gap-2">
+                <label htmlFor="board-comment-body" className="sr-only">
+                  Add a comment for the Board only
+                </label>
+                <AutoGrowTextarea
+                  id="board-comment-body"
+                  name="body"
+                  placeholder="Add a comment for the Board only…"
+                  className="flex-1 rounded-md border border-slate-500 px-3 py-2 text-sm"
+                />
+                <Button type="submit" variant="ghost">
+                  Post
+                </Button>
+              </form>
+            </section>
+
+            <section className="border-t border-slate-200 pt-6">
+              <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Resident Requested Info</h3>
+              <div className="space-y-2">
+                {messages.map((m) => {
+                  const isFromResident = isResidentAuthor(m.authorId, boardMemberIds);
+                  return (
+                    <div
+                      key={m.id}
+                      className={`border-t border-slate-100 pt-2 text-sm ${isFromResident ? "ml-4 border-l-2 border-emerald-200 pl-3" : ""}`}
+                    >
+                      <div className="text-xs font-mono uppercase tracking-wide text-slate-500">
+                        {`${new Date(m.createdAt).toLocaleDateString()} — ${messageTypeLabel(m.messageType, isFromResident)}`}
+                      </div>
+                      <div className="text-slate-700">{m.body}</div>
+                      {m.citedSections.length > 0 && (
+                        <div className="mt-1 text-xs text-slate-500">
+                          {m.messageType === "approved_conditional" ? "Conditions" : "Reason"}: {m.citedSections.join(", ")}
+                        </div>
+                      )}
+                      {m.documentIds.length > 0 && (
+                        <div className="mt-1 text-xs text-slate-500">
+                          {m.documentIds.length === 1 ? "Document" : `${m.documentIds.length} documents`} uploaded — see the{" "}
+                          <a href="#documents" className="text-emerald-800 underline hover:text-emerald-900">
+                            attached documents
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {!decided && (
+                <form action={boundInfoRequest} className="mt-3 flex items-end gap-2">
+                  <label htmlFor="info-request-body" className="sr-only">
+                    Request more info from the resident
+                  </label>
+                  <AutoGrowTextarea
+                    id="info-request-body"
+                    name="body"
+                    placeholder="Request more info from the resident…"
+                    className="flex-1 rounded-md border border-slate-500 px-3 py-2 text-sm"
+                  />
+                  <Button type="submit" variant="ghost">
+                    Send
+                  </Button>
+                </form>
+              )}
+            </section>
+          </div>
         </Card>
       </main>
     </>

@@ -15,6 +15,8 @@ export function AutoGrowTextarea({
   required,
   className,
   "aria-describedby": ariaDescribedBy,
+  "aria-invalid": ariaInvalid,
+  onChange,
 }: {
   id?: string;
   name: string;
@@ -22,6 +24,8 @@ export function AutoGrowTextarea({
   required?: boolean;
   className?: string;
   "aria-describedby"?: string;
+  "aria-invalid"?: boolean;
+  onChange?: () => void;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
@@ -33,8 +37,12 @@ export function AutoGrowTextarea({
       placeholder={placeholder}
       required={required}
       aria-describedby={ariaDescribedBy}
+      aria-invalid={ariaInvalid}
       rows={1}
-      onInput={(e) => resize(e.currentTarget)}
+      onInput={(e) => {
+        resize(e.currentTarget);
+        onChange?.();
+      }}
       className={clsx("max-h-[60vh] resize-none overflow-y-auto", className)}
     />
   );

@@ -57,7 +57,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
                 <div className="mt-1 text-sm text-slate-700">{m.body}</div>
                 {m.citedSections.length > 0 && (
                   <div className="mt-1 text-xs text-slate-500">
-                    {m.messageType === "approved_conditional" ? "Conditions" : "Citing"}: {m.citedSections.join(", ")}
+                    {m.messageType === "approved_conditional" ? "Conditions" : "Reason"}: {m.citedSections.join(", ")}
                   </div>
                 )}
               </div>

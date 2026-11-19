@@ -53,10 +53,13 @@ export async function castVoteAction(requestId: string, decision: VoteDecision, 
   const member = await getBoardSession();
   if (!member) redirect("/board/signin");
 
-  const citedSections = String(formData.get("citedSections") ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+  // One free-text message, kept whole (it may be a cited rule or a subjective
+  // reason, so commas aren't separators). Stored as a single cited_sections
+  // entry. A denial needs a non-blank message; an approval's is optional
+  // and, if present, makes it a conditional approval.
+  const message = String(formData.get("message") ?? "").trim();
+  if (decision === "deny" && !message) return;
+  const citedSections = message ? [message] : [];
 
   const request = await castVote(requestId, member.id, member.addresses, decision, citedSections);
 
@@ -72,7 +75,7 @@ export async function castVoteAction(requestId: string, decision: VoteDecision, 
       .at(-1);
     const cited = decisionMessage?.citedSections ?? [];
     const category = getCategory(request.categorySlug)?.name ?? request.categorySlug;
-    const conditionsLine = cited.length > 0 ? `\n\n${decision === "deny" ? "Citing" : "Conditions"}: ${cited.join(", ")}` : "";
+    const conditionsLine = cited.length > 0 ? `\n\n${decision === "deny" ? "Reason" : "Conditions"}: ${cited.join(", ")}` : "";
     const siteUrl = await getSiteUrl();
     const link = await signInLink(siteUrl, request.residentEmail, "resident", `/requests/${requestId}`);
     await sendEmail(
